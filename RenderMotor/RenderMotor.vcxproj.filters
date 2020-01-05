@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{6816f2f4-09da-446d-bb03-b3d2a2093e37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{5733b9ec-8bbc-47f2-ba7e-82b2f9eb2ce9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\motorGrafico">
+      <UniqueIdentifier>{d4130a6b-ddb7-4477-8419-2fc90f225009}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\textura.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shaderCompilado.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Nodo.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Malla.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Luz.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interpolacion.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camara.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\auxiliar.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BOX.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\textura.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaderCompilado.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Nodo.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Malla.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Luz.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interpolacion.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camara.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\auxiliar.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shaders\shader.v3.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v3.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v2.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v2.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v1.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v1.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v0.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.v0.frag">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
