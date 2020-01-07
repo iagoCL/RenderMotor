@@ -12,66 +12,72 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\textura.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\shaderCompilado.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Nodo.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Malla.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Luz.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Interpolacion.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Database.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Camara.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
     <ClInclude Include="src\auxiliar.h">
       <Filter>src\motorGrafico</Filter>
     </ClInclude>
-    <ClInclude Include="src\BOX.h">
+    <ClInclude Include="src\Texture.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Node.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Model3D.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Light.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interpolation.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shader.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Material.h">
       <Filter>src\motorGrafico</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\textura.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\shaderCompilado.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Nodo.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Malla.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Luz.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Interpolacion.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Camara.cpp">
+    <ClCompile Include="src\BoxModel3D.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
     <ClCompile Include="src\auxiliar.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Model3D.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Light.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interpolation.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camera.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Material.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
   </ItemGroup>

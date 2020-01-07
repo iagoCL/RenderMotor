@@ -11,28 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\auxiliar.h" />
-    <ClInclude Include="src\BOX.h" />
-    <ClInclude Include="src\Camara.h" />
-    <ClInclude Include="src\Database.h" />
-    <ClInclude Include="src\Interpolacion.h" />
-    <ClInclude Include="src\Luz.h" />
-    <ClInclude Include="src\Malla.h" />
-    <ClInclude Include="src\Nodo.h" />
-    <ClInclude Include="src\shaderCompilado.h" />
-    <ClInclude Include="src\textura.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\Interpolation.h" />
+    <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\Model3D.h" />
+    <ClInclude Include="src\Node.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\auxiliar.cpp" />
-    <ClCompile Include="src\Camara.cpp" />
-    <ClCompile Include="src\Database.cpp" />
-    <ClCompile Include="src\Interpolacion.cpp" />
-    <ClCompile Include="src\Luz.cpp" />
+    <ClCompile Include="src\BoxModel3D.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Interpolation.cpp" />
+    <ClCompile Include="src\Light.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Malla.cpp" />
-    <ClCompile Include="src\Nodo.cpp" />
-    <ClCompile Include="src\shaderCompilado.cpp" />
-    <ClCompile Include="src\textura.cpp" />
+    <ClCompile Include="src\Model3D.cpp" />
+    <ClCompile Include="src\Node.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\shader.v0.frag" />
