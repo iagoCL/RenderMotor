@@ -12,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\auxiliar.h">
-      <Filter>src\motorGrafico</Filter>
-    </ClInclude>
     <ClInclude Include="src\Texture.h">
       <Filter>src\motorGrafico</Filter>
     </ClInclude>
@@ -42,12 +39,12 @@
     <ClInclude Include="src\Material.h">
       <Filter>src\motorGrafico</Filter>
     </ClInclude>
+    <ClInclude Include="src\IlluminationSet.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BoxModel3D.cpp">
-      <Filter>src\motorGrafico</Filter>
-    </ClCompile>
-    <ClCompile Include="src\auxiliar.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
@@ -78,6 +75,9 @@
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
     <ClCompile Include="src\Material.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IlluminationSet.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
   </ItemGroup>

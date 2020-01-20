@@ -2,7 +2,7 @@
 
 Model3D* Model3D::getCubeModel() {
     const int cubeNVertex = 24;         // 4 vertices x 6 faces
-    const int cubeNTriangleIndex = 12;  // 2 triangulos por face x  6 face;
+    const int cubeNTriangleIndex = 12;  // 2 triangles x  6 face;
 
     const unsigned int cubeTriangleIndex[] = {
         0, 1, 2, 1, 3, 2,        // Face z = 1
@@ -13,7 +13,7 @@ Model3D* Model3D::getCubeModel() {
         20, 22, 21, 21, 22, 23,  // Face y = -1
     };
 
-    // Posicion de los vertices
+    // Vertices positions
     const float cubeVertexPos[] = {
         // Face z = 1
         -1.0f, -1.0f, 1.0f,  // 0
@@ -115,7 +115,7 @@ Model3D* Model3D::getCubeModel() {
         0.6f, 1.0f, 0.6f   // 23
     };
 
-    // Cood. de textura de los vertices
+    // Vertices texture coord.
     const float cubeVertexTexCoord[] = {
         // Face z = 1
         0.0f, 0.0f,  // 0

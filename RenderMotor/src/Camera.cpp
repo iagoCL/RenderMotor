@@ -31,11 +31,11 @@ void Camera::setProjection(float angle, float aspectRatio, float near, float far
     projectionMatrix = glm::perspective(glm::radians(angle), aspectRatio, near, far);
 }
 
-glm::mat4 Camera::getView() {
+glm::mat4 Camera::getView() const {
     return viewMatrix;
 }
 
-glm::mat4 Camera::getProj() {
+glm::mat4 Camera::getProj() const {
     return projectionMatrix;
 }
 

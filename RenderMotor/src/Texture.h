@@ -2,6 +2,7 @@
 #define RENDER_MOTOR_TEXTURE_H
 
 #include <gl/glew.h>
+
 #include <gl/gl.h>
 
 class Texture {
@@ -17,8 +18,7 @@ class Texture {
 
     Texture(const char *fileName);
     ~Texture();
-    void sendToShaderProgram(unsigned int uniformId);
-    void applyAnisotropicFilter();
-    Texture *clone();
+    void sendToShaderProgram(unsigned int uniformId) const;
+    void applyAnisotropicFilter() const;
 };
 #endif  //RENDER_MOTOR_TEXTURE_H

@@ -1,12 +1,20 @@
-#ifndef RENDER_MOTOR_SHADER_PROGRAM_H
-#define RENDER_MOTOR_SHADER_PROGRAM_H
+#ifndef RENDER_MOTOR_SHADER_H
+#define RENDER_MOTOR_SHADER_H
 
+#include <gl/glew.h>
+
+#include <gl/gl.h>
+#include "IlluminationSet.h"
+#include "Scene.h"
+
+class Scene;
+class IlluminationSet;
 class Shader {
     //Definimos las variables que nos dan acceso a los shaders
 
    private:
-    unsigned int vshader;
-    unsigned int fshader;
+    unsigned int vertexShader;
+    unsigned int fragShader;
     unsigned int program;
 
     //Variables con las que hacedemos a los atributos de los shaders
@@ -15,53 +23,30 @@ class Shader {
     int uModelViewProjMat;
     int uNormalMat;
 
-    //uniformes luz
-    int* uLPos;
-    int* uLDir;
-    int* uLCol;
-    int* uLAngle;
+    std::vector<IlluminationSet*> illuminations;
+    Scene* scene;
 
-    //Texturas Uniform
-    int uColorTex;
-    int uEmiTex;
-    int uSpecTex;
-    int uNormTex;
-
-    //Atributos
-    int inPos;
-    int inColor;
-    int inNormal;
-    int inTexCoord;
-    int inTangent;
-
-    int LucesActuales;
+    int loadShader(const GLchar** shaderString, const GLint stringLength, const int type) const;
+    void initShader();
+    void showShaderError() const;
 
    public:
-    Shader(const char* vname, const char* fname, int numeroDeLuces = 3);
+    Shader(const char* vertPath, const char* fragPath, Scene* scene_);
+    Shader(const GLchar** vertString, const GLint vertStringLength, const GLchar** fragString, const GLint fragStringLength, Scene* scene_);
     ~Shader();
 
-    int loadShader(const char* fileName, int type);
-    void initShader(const char* vname, const char* fname, int numeroDeLuces);
+    void renderShader(glm::mat4 view, glm::mat4 proj) const;
+    void addIllumination(IlluminationSet* illumination);
 
-    unsigned int getprogram();
-    int getuModelViewMat();
-    int getuModelViewProjMat();
-    int getuNormalMat();
+    int getuNormalMat() const;
+    int getuModelViewMat() const;
+    int getuModelViewProjMat() const;
 
-    int getuLPos(int numero = 0);
-    int getuLCol(int numero = 0);
-    int getuLDir(int numero = 0);
-    int getuLAngle(int numero = 0);
+    unsigned int getprogram() const;
+    int getProgram() const;
 
-    int getuColorTex();
-    int getuNormTex();
-    int getuEmiTex();
-    int getuSpecTex();
-    int getinPos();
-    int getinColor();
-    int getinNormal();
-    int getinTexCoord();
-    int getinTangent();
-    int getProgram();
+    Scene* getScene() const;
+
+    static char* loadStringFromFile(const char* fileName, unsigned int& fileLen);
 };
-#endif //RENDER_MOTOR_SHADER_PROGRAM_H
+#endif  //RENDER_MOTOR_SHADER_H

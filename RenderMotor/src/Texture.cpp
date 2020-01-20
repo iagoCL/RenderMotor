@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include "auxiliar.h"
 
 #include <FreeImage.h>
 #include <windows.h>
@@ -94,13 +93,13 @@ unsigned char *Texture::readTextureFromFile(const char *fileName, unsigned int &
     return map;
 }
 
-void Texture::sendToShaderProgram(unsigned int uniformId) {
+void Texture::sendToShaderProgram(unsigned int uniformId) const {
     glActiveTexture(GL_TEXTURE0 + textureNumber);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glUniform1i(uniformId, textureNumber);
 }
 
-void Texture::applyAnisotropicFilter() {
+void Texture::applyAnisotropicFilter() const {
     int extensionNumber = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &extensionNumber);  //Total number of extensions
     bool found = false;
@@ -117,8 +116,4 @@ void Texture::applyAnisotropicFilter() {
     } else {
         std::cout << "\n Texture " << textureNumber << ": anisotropic filter is not supported." << std::endl;
     }
-}
-
-Texture *Texture::clone() {
-    return new Texture(textureId, textureNumber);
 }

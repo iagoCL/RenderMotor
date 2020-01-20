@@ -190,85 +190,44 @@ void Model3D::initObject() {
     glGenBuffers(1, &trianglesIndexVBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, trianglesIndexVBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numTriangles * sizeof(unsigned int) * 3, trianglesArray, GL_STATIC_DRAW);
+
+    linkShaderVBOs();
 }
 
-void Model3D::linkShaderVBOs(GLint inPosition, GLint inColor, GLint inNormal, GLint inTexCoord, GLint inTangent) {
+void Model3D::linkShaderVBOs() {
     glBindVertexArray(modelVAO);
 
-    if (inPosition >= 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
-        GLuint inPositionU = static_cast<GLuint>(inPosition);
-        glVertexAttribPointer(inPositionU, 3 /*3 elements per vertex*/, GL_FLOAT, GL_FALSE, 0 /*stride*/, 0 /*offset*/);
-        glEnableVertexAttribArray(inPositionU);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+    glVertexAttribPointer(0, 3 /*3 elements per vertex*/, GL_FLOAT, GL_FALSE, 0 /*stride*/, 0 /*offset*/);
+    glEnableVertexAttribArray(0);
 
-    if (inColor >= 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-        GLuint inColorU = static_cast<GLuint>(inColor);
-        glVertexAttribPointer(inColorU, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(inColorU);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 
-    if (inNormal >= 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
-        GLuint inNormalU = static_cast<GLuint>(inNormal);
-        glVertexAttribPointer(inNormalU, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(inNormalU);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
 
-    if (inTexCoord >= 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, textCoordVBO);
-        GLuint inTexCoordU = static_cast<GLuint>(inTexCoord);
-        glVertexAttribPointer(inTexCoordU, 2, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(inTexCoordU);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, textCoordVBO);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(3);
 
-    if (inTangent >= 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, tangentVBO);
-        GLuint inTangentU = static_cast<GLuint>(inTangent);
-        glVertexAttribPointer(inTangentU, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(inTangentU);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, tangentVBO);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(4);
 }
 
-void Model3D::setModel(glm::mat4 modelMatrix_) {
-    modelMatrix = modelMatrix_;
-}
-
-void Model3D::renderModel(glm::mat4 view, glm::mat4 proj, GLint IdModelView, GLint IdModelViewProj, GLint IdNormal) {
-    glm::mat4 modelView = view * modelMatrix;
-    glm::mat4 modelViewProj = proj * modelView;
-    glm::mat4 normal = glm::transpose(glm::inverse(modelView));
-    if (IdModelView != -1) {
-        glUniformMatrix4fv(IdModelView, 1, GL_FALSE, &(modelView[0][0]));
-    }
-    if (IdModelViewProj != -1) {
-        glUniformMatrix4fv(IdModelViewProj, 1, GL_FALSE, &(modelViewProj[0][0]));
-    }
-    if (IdNormal != -1) {
-        glUniformMatrix4fv(IdNormal, 1, GL_FALSE, &(normal[0][0]));
-    }
+void Model3D::renderModel() const {
     glBindVertexArray(modelVAO);
     glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, (void*)0 /* Offset of the first index in the array*/);
 }
 
-Model3D* Model3D::clone() {
-    Model3D* copia = new Model3D(numTriangles, numVertices, trianglesArray, colorsArray, normalsArray, positionsArray, tangentsArray, textCoordArray);
-    copia->modelVAO = modelVAO;
-    copia->positionVBO = positionVBO;
-    copia->colorVBO = colorVBO;
-    copia->normalVBO = normalVBO;
-    copia->textCoordVBO = textCoordVBO;
-    copia->trianglesIndexVBO = trianglesIndexVBO;
-    copia->tangentVBO = tangentVBO;
-    return copia;
-}
-
-int Model3D::getNumTriangles() {
+int Model3D::getNumTriangles() const {
     return numTriangles;
 }
 
-int Model3D::getVAO() {
+int Model3D::getVAO() const {
     return modelVAO;
 }
 
@@ -377,7 +336,7 @@ void Model3D::recomputeNormalsAndTangents(bool checkDuplicates) {
 }
 
 void Model3D::combineSimilarVertices(const bool checkColorAndTextures) {
-    std::cout << "Simplifing mesh with: " << numVertices << " verices." << std::endl;
+    std::cout << "Simplifying mesh with: " << numVertices << " vertices." << std::endl;
     std::vector<glm::vec3> tempPositions;
     std::vector<float> tempNormals;
     std::vector<float> tempTangents;
@@ -489,7 +448,7 @@ void Model3D::combineSimilarVertices(const bool checkColorAndTextures) {
             textCoordArray[vertexId++] = it->y;
         }
     }
-    std::cout << "Completed model symplification." << std::endl;
+    std::cout << "Completed model simplification." << std::endl;
 }
 
 Model3D* Model3D::allocateModel3D(const int numTriangles_, const int numVertices_, const unsigned int* trianglesArray_, const float* colorsArray_, const float* normalArray_, const float* positionsArray_, const float* tangentArray_, const float* textCoordArray_) {

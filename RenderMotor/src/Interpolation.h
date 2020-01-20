@@ -12,7 +12,7 @@ class Interpolation {
    public:
     Interpolation(const float totalTime);
     virtual void increaseTime(const float timeIncrease);
-    virtual glm::vec3 getPosition() = 0;
+    virtual glm::vec3 getPosition() const = 0;
 };
 class SplinesInterpolation : public Interpolation {
    private:
@@ -22,7 +22,7 @@ class SplinesInterpolation : public Interpolation {
 
    public:
     SplinesInterpolation(const float totalTime_, std::vector<glm::vec3>* controlPoints_, std::vector<float>* controlTangents_);
-    glm::vec3 getPosition();
+    glm::vec3 getPosition() const override;
     static std::vector<glm::vec3>* getCirclePoints(float radio);
     static std::vector<float>* getCircleTangents();
     ~SplinesInterpolation();
@@ -34,7 +34,7 @@ class BezierInterpolation : public Interpolation {
 
    public:
     BezierInterpolation(const float totalTime_, std::vector<glm::vec3>* controlPoints_);
-    glm::vec3 getPosition();
+    glm::vec3 getPosition() const override;
     static std::vector<glm::vec3>* getCirclePoints(const float radio);
     ~BezierInterpolation();
 };

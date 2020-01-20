@@ -1,213 +1,148 @@
 #include "Shader.h"
-#include <gl/glew.h>
-#include <gl/gl.h>
+
+#include <fstream>
 #include <iostream>
 #include <string>
-#include "auxiliar.h"
 
-Shader::Shader(const char *vname, const char *fname, int numeroDeLuces) {
-    initShader(vname, fname, numeroDeLuces);
+Shader::Shader(const char *vertPath, const char *fragPath, Scene *scene_) : scene(scene_) {
+    unsigned int fileLen;
+    char *fileString = loadStringFromFile(vertPath, fileLen);
+    vertexShader = loadShader(const_cast<const GLchar **>(static_cast<GLchar **>(&fileString)), static_cast<const GLint>(fileLen), GL_VERTEX_SHADER);
+    delete fileString;
+    fileString = loadStringFromFile(fragPath, fileLen);
+    fragShader = loadShader(const_cast<const GLchar **>(static_cast<GLchar **>(&fileString)), static_cast<const GLint>(fileLen), GL_FRAGMENT_SHADER);
+    delete fileString;
+    initShader();
+}
+Shader::Shader(const GLchar **vertString, const GLint vertStringLength, const GLchar **fragString, const GLint fragStringLength, Scene *scene_)
+    : vertexShader(loadShader(vertString, vertStringLength, GL_VERTEX_SHADER)),
+      fragShader(loadShader(fragString, fragStringLength, GL_FRAGMENT_SHADER)),
+      scene(scene_) {
+    initShader();
 }
 
 Shader::~Shader() {
-    delete uLPos;
-    delete uLDir;
-    delete uLCol;
-    delete uLAngle;
-
-    glDetachShader(program, vshader);
-    glDetachShader(program, fshader);
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
+    glDetachShader(program, vertexShader);
+    glDetachShader(program, fragShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragShader);
     glDeleteProgram(program);
 }
-
-int Shader::loadShader(const char *fileName, int type) {
-    //Lee el shader
-    unsigned int fileLen;                                  //longitud del shader
-    char *source = loadStringFromFile(fileName, fileLen);  //lee un archivo desde disco usando la funcion auxiliar, devuelve por parametro la longitud
-                                                           //////////////////////////////////////////////
-                                                           //Creaci�n y compilaci�n del Shader
-    GLuint shader;                                         //
-    shader = glCreateShader(type);                         //crea un shader del tipo pasado por el argumento
-    glShaderSource(shader /*identificador donde almacenar el shader*/, 1 /*tenemos una unica cadena*/,
-                   (const GLchar **)&source /*codigo fuiente del shader*/, (const GLint *)&fileLen /*longitud del shader*/);
-    glCompileShader(shader);  //Decimos que compile el shader que hemos creado
-    delete source;            //borramos de memoria el shader porque ya esta compilado y no lo volvemos a usar
-
-    //Codigo para la comprobacion de errores
-    //Comprobamos que se compil� bien
-    GLint compiled;                                       //almacena el estado de la compilaci�n
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);  //almacena por referencia en la variable creada el estado de la compilaci�n
-    if (!compiled)                                        //comprueba si ha habido error de comprobacion
-    {
-        //Calculamos una cadena de error
-        GLint logLen;                                                               //longitud de la cadena de error
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);                         //almacena en la variable la longitud del error
-        char *logString = new char[logLen];                                         //reserva de memoria dinamica, reserva un array de la longitud del error
-        glGetShaderInfoLog(shader, logLen, NULL, logString);                        //obtiene la cadena de error
-        std::cout << "\n Error al compilar el shader: " << logString << std::endl;  //muestra el error por consola
-        delete logString;                                                           //elimina de memoria dinamica la cadena de error; no es necesario eliminar la longitud porque es memoria estatica
-        glDeleteShader(shader);                                                     //borramos el shader ya que se ha compilado con error
-        char a;
-        std::cin >> a;
-        exit(-1);  //salimos con error
+void Shader::addIllumination(IlluminationSet *illumination) {
+    illuminations.push_back(illumination);
+}
+void Shader::renderShader(glm::mat4 view, glm::mat4 proj) const {
+    glUseProgram(program);
+    for (auto itIllumination = illuminations.begin(); itIllumination != illuminations.end(); ++itIllumination) {
+        (*itIllumination)->renderMaterials(view, proj);
     }
-    return shader;  //devuelve el shader
+}
+int Shader::loadShader(const GLchar **shaderString, const GLint stringLength, const int type) const {
+    GLuint shader;
+    shader = glCreateShader(type);
+    glShaderSource(shader, 1 /*One string*/, shaderString, &stringLength);
+    glCompileShader(shader);
+
+    //Check and error retrieval
+    GLint compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        GLint logLen;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
+        char *logString = new char[logLen];
+        glGetShaderInfoLog(shader, logLen, NULL, logString);
+        std::cout << "\n Error al compilar el shader: " << logString << std::endl;
+        delete logString;
+        glDeleteShader(shader);
+        exit(-1);
+    }
+    return shader;
 }
 
-void Shader::initShader(const char *vname, const char *fname, int numeroDeLuces) {
-    vshader = loadShader(vname, GL_VERTEX_SHADER);    //crea el shader de vertices
-    fshader = loadShader(fname, GL_FRAGMENT_SHADER);  //crea el shader de fragmentos
-
-    program = glCreateProgram();       //crea un programa de openGL
-    glAttachShader(program, vshader);  //linka el shader de vertices con el programa
-    glAttachShader(program, fshader);  //linka el shader de fragmentos con el programa
-
-    //Establecemos la posicion de los atributos variantes
-    //se debe hacer antes del linkado porque sino no conserva los nombres y posiciones
+void Shader::initShader() {
+    program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragShader);
     glBindAttribLocation(program, 0, "inPos");
     glBindAttribLocation(program, 1, "inColor");
     glBindAttribLocation(program, 2, "inNormal");
     glBindAttribLocation(program, 3, "inTexCoord");
     glBindAttribLocation(program, 4, "inTangent");
 
-    glLinkProgram(program);  //linkamos el programa
+    glLinkProgram(program);
 
-    //Control de errores
-    GLint linked;                                      //indica si esta linkado
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);  //almacena en linked si esta linkado
-    if (!linked)                                       //alamacena si ha habido un error de linkado
-    {
-        //Calculamos una cadena de error de forma similar a la de compilacion de shader
+    GLint linked;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (!linked) {
         GLint logLen;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLen);
         char *logString = new char[logLen];
         glGetProgramInfoLog(program, logLen, NULL, logString);
-        std::cout << "Error: " << logString << std::endl;
+        std::cout << "Error linking shader: " << logString << std::endl;
         delete logString;
         glDeleteProgram(program);
-        program = 0;  //pone el programa a nulo
-        exit(-1);     //sale con codigo de error
+        exit(-1);
     }
 
-    //Obtenemos un localizador para cada una de las variable uniformes
     uNormalMat = glGetUniformLocation(program, "normal");
     uModelViewMat = glGetUniformLocation(program, "modelView");
     uModelViewProjMat = glGetUniformLocation(program, "modelViewProj");
 
-    LucesActuales = numeroDeLuces;
-    uLPos = new int[numeroDeLuces];
-    uLDir = new int[numeroDeLuces];
-    uLCol = new int[numeroDeLuces];
-    uLAngle = new int[numeroDeLuces];
-
-    for (int i = 0; i < numeroDeLuces; i++) {
-        char a = char(int('1') + i);
-        std::string aux = std::string("Posl").append(&a, &a + 1);
-        uLPos[i] = glGetUniformLocation(program, &aux[0]);
-        aux = std::string("Dirl").append(&a, &a + 1);
-        uLDir[i] = glGetUniformLocation(program, &aux[0]);
-        aux = std::string("Il").append(&a, &a + 1);
-        uLCol[i] = glGetUniformLocation(program, &aux[0]);
-        aux = std::string("Anglel").append(&a, &a + 1);
-        uLAngle[i] = glGetUniformLocation(program, &aux[0]);
-        //std::cout << "\n" << i << " - " << uLPos[i] << " - " << uLDir[i] << " - " << uLCol[i] << " - " << uLAngle[i];
-    }
-    uColorTex = glGetUniformLocation(program, "colorTex");
-    uEmiTex = glGetUniformLocation(program, "emiTex");
-    uSpecTex = glGetUniformLocation(program, "specularTex");
-    uNormTex = glGetUniformLocation(program, "normalTex");
-
-    //Obtenemos un localizador para cada una de las variable variantes
-    //Comprobamos de esta forma que estan definidos y conservan los valores que les hemos dado
-    inPos = glGetAttribLocation(program, "inPos");
-    inColor = glGetAttribLocation(program, "inColor");
-    inNormal = glGetAttribLocation(program, "inNormal");
-    inTexCoord = glGetAttribLocation(program, "inTexCoord");  //Si no usamos coordenadas de textura devuelve -1
-    inTangent = glGetAttribLocation(program, "inTangent");
+    scene->addShader(this);
 }
 
-unsigned int Shader::getprogram() {
+unsigned int Shader::getprogram() const {
     return program;
 }
 
-int Shader::getuModelViewMat() {
+int Shader::getuModelViewMat() const {
     return uModelViewMat;
 }
 
-int Shader::getuModelViewProjMat() {
+int Shader::getuModelViewProjMat() const {
     return uModelViewProjMat;
 }
 
-int Shader::getuNormalMat() {
+int Shader::getuNormalMat() const {
     return uNormalMat;
 }
 
-int Shader::getuLPos(int numero) {
-    if (numero < LucesActuales && numero > -1)
-        return uLPos[numero];
-    else
-        return -1;
-}
-
-int Shader::getuLCol(int numero) {
-    if (numero < LucesActuales && numero > -1)
-        return uLCol[numero];
-    else
-        return -1;
-}
-
-int Shader::getuLDir(int numero) {
-    if (numero < LucesActuales && numero > -1)
-        return uLDir[numero];
-    else
-        return -1;
-}
-
-int Shader::getuLAngle(int numero) {
-    if (numero < LucesActuales && numero > -1)
-        return uLAngle[numero];
-    else
-        return -1;
-}
-
-int Shader::getuColorTex() {
-    return uColorTex;
-}
-
-int Shader::getuNormTex() {
-    return uNormTex;
-}
-
-int Shader::getuEmiTex() {
-    return uEmiTex;
-}
-
-int Shader::getuSpecTex() {
-    return uSpecTex;
-}
-
-int Shader::getinPos() {
-    return inPos;
-}
-
-int Shader::getinColor() {
-    return inColor;
-}
-
-int Shader::getinNormal() {
-    return inNormal;
-}
-
-int Shader::getinTexCoord() {
-    return inTexCoord;
-}
-
-int Shader::getinTangent() {
-    return inTangent;
-}
-
-int Shader::getProgram() {
+int Shader::getProgram() const {
     return program;
+}
+
+Scene *Shader::getScene() const {
+    return scene;
+}
+
+char *Shader::loadStringFromFile(const char *fileName, unsigned int &fileLen) {
+    // Loads the file
+    std::ifstream file;
+    file.open(fileName, std::ios::in);
+    if (!file) {
+        return 0;
+    }
+
+    // File length
+    file.seekg(0, std::ios::end);
+    fileLen = unsigned int(file.tellg());
+    file.seekg(std::ios::beg);
+
+    // Allocates enough memory
+    char *source = new char[fileLen + 1];
+
+    //Reads the file
+    int i = 0;
+    while (file.good()) {
+        source[i] = char(file.get());
+        if (!file.eof()) {
+            ++i;
+        } else {
+            fileLen = i;
+        }
+    }
+    source[fileLen] = '\0';
+    file.close();
+
+    return source;
 }

@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Material.h" />
-    <ClInclude Include="src\auxiliar.h" />
+    <ClInclude Include="src\IlluminationSet.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Interpolation.h" />
@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Material.cpp" />
-    <ClCompile Include="src\auxiliar.cpp" />
+    <ClCompile Include="src\IlluminationSet.cpp" />
     <ClCompile Include="src\BoxModel3D.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Scene.cpp" />

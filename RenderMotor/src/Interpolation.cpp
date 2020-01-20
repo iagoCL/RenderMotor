@@ -21,9 +21,6 @@ BezierInterpolation::BezierInterpolation(const float totalTime_, std::vector<glm
     : Interpolation(totalTime_),
       timePerStep(totalTime_ / static_cast<float>(controlPoints_->size() / 2)),
       controlPoints(controlPoints_) {
-    for (int i = 0; i < controlPoints_->size(); ++i) {
-        glm::vec3 newPos = controlPoints->at(i);
-    }
 }
 std::vector<glm::vec3>* BezierInterpolation::getCirclePoints(const float radio) {
     /*
@@ -47,7 +44,7 @@ std::vector<glm::vec3>* BezierInterpolation::getCirclePoints(const float radio) 
     circleControlPoints->push_back(glm::vec3(0.0f, 0.0f, radio));
     return circleControlPoints;
 }
-glm::vec3 BezierInterpolation::getPosition() {
+glm::vec3 BezierInterpolation::getPosition() const {
     float stepNumber = floorf(actualTime / timePerStep);
 
     float stepTime = actualTime - stepNumber * timePerStep;
@@ -69,7 +66,7 @@ std::vector<glm::vec3>* SplinesInterpolation::getCirclePoints(float radio) {
      * Points needed to follow a circle with center in 0,0 it moves on the plane xy, orbits around the z axis
      */
 
-    radio = radio * cos(glm::quarter_pi<double>());
+    radio *= cosf(glm::quarter_pi<float>());
     std::vector<glm::vec3>* circleControlPoints = new std::vector<glm::vec3>();
     circleControlPoints->reserve(5);
     circleControlPoints->push_back(glm::vec3(radio, radio, 0.0f));
@@ -95,7 +92,7 @@ std::vector<float>* SplinesInterpolation::getCircleTangents() {
 
     return circleControlTangents;
 }
-glm::vec3 SplinesInterpolation::getPosition() {
+glm::vec3 SplinesInterpolation::getPosition() const {
     float stepNumber = floorf(actualTime / timePerStep);
 
     float stepTime = actualTime - stepNumber * timePerStep;

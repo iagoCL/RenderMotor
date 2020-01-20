@@ -1,6 +1,7 @@
 #include "Light.h"
 
 #include <gl/glew.h>
+
 #include <gl/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -49,7 +50,7 @@ void Light::rotate(glm::vec3 rotacion, float angle) {
     direction = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, rotacion) * glm::vec4(direction, 0.0f));
 }
 
-void Light::sendToShader(glm::mat4 view, unsigned int positionId, unsigned int directionId, unsigned int angleId) {
+void Light::sendToShader(glm::mat4 view, unsigned int positionId, unsigned int directionId, unsigned int angleId) const {
     if (type == 0) {
         std::cout << "WARNING: Sending to shader a Null light";
     } else {
@@ -65,7 +66,7 @@ void Light::sendToShader(glm::mat4 view, unsigned int positionId, unsigned int d
     }
 }
 
-void Light::sendDirectionToShader(glm::mat4 view, unsigned int id) {
+void Light::sendDirectionToShader(glm::mat4 view, unsigned int id) const {
     if (id >= 0) {
         glm::vec3 tmp = glm::normalize(glm::vec3(view * glm::vec4(direction, 0.0f)));
         glUniform3fv(id, 1, &(tmp[0]));
@@ -74,7 +75,7 @@ void Light::sendDirectionToShader(glm::mat4 view, unsigned int id) {
     }
 }
 
-void Light::sendAngleToShader(unsigned int id) {
+void Light::sendAngleToShader(unsigned int id) const {
     if (id != -1) {
         glUniform1f(id, angle);
     } else {
@@ -82,7 +83,7 @@ void Light::sendAngleToShader(unsigned int id) {
     }
 }
 
-void Light::sendPositionToShader(glm::mat4 view, unsigned int id) {
+void Light::sendPositionToShader(glm::mat4 view, unsigned int id) const {
     if (id != -1) {
         glm::vec3 temp = glm::vec3(view * glm::vec4(position, 1.0f));
         glUniform3fv(id, 1, &(temp[0]));
@@ -91,14 +92,14 @@ void Light::sendPositionToShader(glm::mat4 view, unsigned int id) {
     }
 }
 
-void Light::sendColorToShader(unsigned int id) {
+void Light::sendColorToShader(unsigned int id) const {
     if (id != -1) {
         glUniform3fv(id, 1, &(color[0]));
     } else {
         std::cout << "WARNING: Not sending light color, invalid uniform: " << id << std::endl;
     }
 }
-int Light::getType() {
+int Light::getType() const {
     return type;
 }
 

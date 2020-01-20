@@ -1,25 +1,24 @@
-#include "auxiliar.h"
-
+#include <gl/glew.h>
 #include <windows.h>
 
-#include <gl/glew.h>
 #include <gl/gl.h>
 #define SOLVE_FGLUT_WARNING
 #include <gl/freeglut.h>
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 #include "Camera.h"
+#include "IlluminationSet.h"
+#include "Interpolation.h"
 #include "Light.h"
 #include "Model3D.h"
 #include "Node.h"
 #include "Scene.h"
 #include "Shader.h"
 #include "Texture.h"
-
-#include "Interpolation.h"
 
 void renderFunc();
 void resizeFunc(int width, int height);
@@ -35,8 +34,9 @@ void destroy();
 
 Interpolation* cubo1;
 Interpolation* cubo2;
-
 Scene* escena;
+Camera* camera;
+Node* movingNodes[4];
 
 //Utiles para mover con el raton
 int xZero = 0;
@@ -50,120 +50,84 @@ int main(int argc, char** argv) {
 
     initContext(argc, argv);
     initOGL();
+    camera = new Camera();
+    camera->setProjection(60.0f, 1.0f, 0.1f, 100.0f);
+    escena = new Scene(camera);
 
-    escena = new Scene();
-
-    //numLuces = 4;
-    Light** luces = new Light*[7];
-    luces[0] = new Light(glm::vec3(0.0f, 0.0f, 11.0f), glm::vec3(0.7f));                                               //luz basica del shader 0
-    luces[1] = new Light(glm::vec3(-3.0, 3.0, 3.0), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(3.0, -3.0, -3.0), 0.5f);    //foco azul
-    luces[2] = new Light(glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 0.0f, 0.0f));                                    //luz puntual roja
-    luces[3] = new Light(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 1.0f, 0.0f), 2);                                    //luz direccional verde
-    luces[4] = new Light(glm::vec3(0.0f, 0.0f, 8.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, -1.0), 0.08f);  //foco normal rojo
-    luces[5] = new Light(glm::vec3(-7.0, 0.0, 3.0), glm::vec3(0.8f));                                                  //luz puntual normal
-    luces[6] = new Light(glm::vec3(0.0, -1.0, -1.0), glm::vec3(0.5f), 2);                                              //luz direccional normal
-    for (int i = 0; i < 7; i++)
-        escena->addLight(luces[i]);
-    delete luces;
-    //numShaders = 3;
-    Shader** shadersCompilados = new Shader*[4];
-    shadersCompilados[0] = new Shader("../shaders/shader.v0.vert", "../shaders/shader.v0.frag");
-    shadersCompilados[1] = new Shader("../shaders/shader.v1.vert", "../shaders/shader.v1.frag");
-    shadersCompilados[2] = new Shader("../shaders/shader.v2.vert", "../shaders/shader.v2.frag", 3);
-    shadersCompilados[3] = new Shader("../shaders/shader.v3.vert", "../shaders/shader.v3.frag", 3);
-    for (int i = 0; i < 4; i++)
-        escena->addShader(shadersCompilados[i]);
-    delete shadersCompilados;
-    int numMallas = 4;
-    Model3D* malla = Model3D::getCubeModel();
+    Model3D* malla = Model3D::getCubeModel();  //TODO: avoid model duplication
     malla->initObject();
-    Model3D** assimp = Model3D::loadFromFile(numMallas, "../img/character/preacherCharacterB.obj");
-    Model3D** mallas = new Model3D*[numMallas];
-    mallas[0] = malla;  //shader bump mapping
-    mallas[1] = malla->clone();  //shader luces colores
-    mallas[2] = malla->clone();  //shader luces colores
-    mallas[3] = malla->clone();  //shader simple
-    for (int i = 4; i < numMallas; i++){
-        mallas[i] = assimp[i - 4];
-        mallas[i]->removeColors();
-        mallas[i]->removeColors();
-        mallas[i]->removeTangents();
-        mallas[i]->combineSimilarVertices();
-        mallas[i]->recomputeNormalsAndTangents(true);
-        mallas[i]->initObject();
+
+
+    Light** lights = new Light*[7];
+    lights[0] = new Light(glm::vec3(0.0f, 0.0f, 11.0f), glm::vec3(0.7f));                                               //luz basica del shader 0
+    lights[1] = new Light(glm::vec3(-3.0, 3.0, 3.0), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(3.0, -3.0, -3.0), 0.5f);    //foco azul
+    lights[2] = new Light(glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 0.0f, 0.0f));                                    //luz puntual roja
+    lights[3] = new Light(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 1.0f, 0.0f), 2);                                    //luz direccional verde
+    lights[4] = new Light(glm::vec3(0.0f, 0.0f, 8.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, -1.0), 0.08f);  //foco normal rojo
+    lights[5] = new Light(glm::vec3(-7.0, 0.0, 3.0), glm::vec3(0.8f));                                                  //luz puntual normal
+    lights[6] = new Light(glm::vec3(0.0, -1.0, -1.0), glm::vec3(0.5f), 2);                                              //luz direccional normal
+
+    Shader* simpleShader = new Shader("../shaders/shader.v0.vert", "../shaders/shader.v0.frag", escena);
+    IlluminationSet* pointLightSet = new IlluminationSet(simpleShader);
+    pointLightSet->addLight(lights[0]);
+    Material* simpleMaterial = new SimpleMaterial(pointLightSet);
+    Node* simpleNode =movingNodes[1]= new Node(malla, simpleMaterial);
+
+    Texture* diffuseCubeTexture = new Texture("../img/color2.png");
+    diffuseCubeTexture->applyAnisotropicFilter();
+    Texture* normCubeTexture = new Texture("../img/normal.png");
+    normCubeTexture->applyAnisotropicFilter();
+    Texture* emissiveCubeTexture = new Texture("../img/emissive.png");
+    emissiveCubeTexture->applyAnisotropicFilter();
+    Texture* specularCubeTexture = new Texture("../img/specMap.png");
+    specularCubeTexture->applyAnisotropicFilter();
+
+    Shader* bumpShader = new Shader("../shaders/shader.v3.vert", "../shaders/shader.v3.frag", escena);
+    IlluminationSet* bumpLightSet = new IlluminationSet(bumpShader);
+    bumpLightSet->addLight(lights[4]);
+    bumpLightSet->addLight(lights[5]);
+    bumpLightSet->addLight(lights[6]);
+    Material* bumpMaterial = new BumpMaterial(bumpLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture, normCubeTexture);
+    Node* bumpNode =movingNodes[0]= new Node(malla, bumpMaterial);
+    /**/
+    Shader* diffuseShader = new Shader("../shaders/shader.v2.vert", "../shaders/shader.v2.frag", escena);
+    IlluminationSet* diffuseMultiColorLightSet = new IlluminationSet(diffuseShader);
+    diffuseMultiColorLightSet->addLight(lights[1]);
+    diffuseMultiColorLightSet->addLight(lights[2]);
+    diffuseMultiColorLightSet->addLight(lights[3]);
+    Material* cubeDiffuseMaterial = new BumpMaterial(diffuseMultiColorLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture, nullptr);
+    Node* diffuseNode2 =movingNodes[2]= new Node(malla, cubeDiffuseMaterial);
+    Node* diffuseNode3 =movingNodes[3]= new Node(malla, cubeDiffuseMaterial);
+
+    Texture* blackTexture = new Texture("../img/black.png");
+    blackTexture->applyAnisotropicFilter();
+    IlluminationSet* diffuseNormalLightSet = new IlluminationSet(diffuseShader);
+    diffuseNormalLightSet->addLight(lights[4]);
+    diffuseNormalLightSet->addLight(lights[5]);
+    diffuseNormalLightSet->addLight(lights[6]);
+    const char* texturesPaths[] = {
+        "../img/character/maps/bodyDiffuseMap.jpg",
+        "../img/character/maps/faceDiffuseMap.jpg",
+        "../img/character/maps/feetDiffuseMap.jpg",
+        "../img/character/maps/handsDiffuseMap.jpg",
+        "../img/character/maps/legsDiffuseMap.jpg"};
+    int numMallas = 0;
+    Model3D** assimpModel = Model3D::loadFromFile(numMallas, "../img/character/preacherCharacterB.obj");
+    for (int i = 0; i < numMallas; i++) {
+        assimpModel[i]->removeColors();
+        assimpModel[i]->removeColors();
+        assimpModel[i]->removeTangents();
+        assimpModel[i]->combineSimilarVertices();
+        assimpModel[i]->recomputeNormalsAndTangents(true);
+        assimpModel[i]->initObject();
+        Texture* modelTexture = new Texture(texturesPaths[i]);
+        modelTexture->applyAnisotropicFilter();
+        Material* tmpMaterial = new BumpMaterial(diffuseNormalLightSet, modelTexture, blackTexture, blackTexture, nullptr);
+        Node* tmpNode = new Node(assimpModel[i], tmpMaterial);
     }
-    delete assimp;
-    Texture* texturaAux1 = new Texture("../img/color2.png");
-    Texture** texturasColores = new Texture*[numMallas];
-    texturasColores[0] = texturaAux1;           //shader bump mapping
-    texturasColores[1] = texturaAux1->clone();  //shader luces colores
-    texturasColores[2] = texturaAux1->clone();  //shader luces colores
-    texturasColores[3] = nullptr;               //shader simple
-    texturasColores[4] = new Texture("../img/character/maps/bodyDiffuseMap.jpg");
-    texturasColores[5] = new Texture("../img/character/maps/faceDiffuseMap.jpg");
-    texturasColores[7] = new Texture("../img/character/maps/handsDiffuseMap.jpg");
-    texturasColores[6] = new Texture("../img/character/maps/feetDiffuseMap.jpg");
-    texturasColores[8] = new Texture("../img/character/maps/legsDiffuseMap.jpg");
-    texturasColores[4]->applyAnisotropicFilter();
-    texturasColores[5]->applyAnisotropicFilter();
-    texturasColores[6]->applyAnisotropicFilter();
-    texturasColores[7]->applyAnisotropicFilter();
-    texturasColores[8]->applyAnisotropicFilter();
 
-    Texture* texturaAux2 = new Texture("../img/emissive.png");
-    texturaAux2->applyAnisotropicFilter();
-    Texture* texturaAux3 = new Texture("../img/black.png");  //imagen en negro
-    Texture** texturasEmis = new Texture*[numMallas];
-    texturasEmis[0] = texturaAux2;           //shader bump mapping
-    texturasEmis[1] = texturaAux2->clone();  //shader luces colores
-    texturasEmis[2] = texturaAux2->clone();  //shader luces colores
-    texturasEmis[3] = nullptr;               //shader simple
-    texturasEmis[4] = texturaAux3->clone();
-    texturasEmis[5] = texturaAux3->clone();
-    texturasEmis[6] = texturaAux3->clone();
-    texturasEmis[7] = texturaAux3->clone();
-    texturasEmis[8] = texturaAux3->clone();
-
-    Texture* texturaAux4 = new Texture("../img/specMap.png");
-    texturaAux4->applyAnisotropicFilter();
-    Texture** texturasSpec = new Texture*[numMallas];
-    texturasSpec[0] = texturaAux4;           //shader bump mapping
-    texturasSpec[1] = texturaAux4->clone();  //shader luces colores
-    texturasSpec[2] = texturaAux4->clone();  //shader luces colores
-    texturasSpec[3] = nullptr;               //shader simple
-    texturasSpec[4] = texturaAux3->clone();
-    texturasSpec[5] = texturaAux3->clone();
-    texturasSpec[6] = texturaAux3->clone();
-    texturasSpec[7] = texturaAux3->clone();
-    texturasSpec[8] = texturaAux3->clone();
-
-    Texture** texturasNorm = new Texture*[numMallas];
-    texturasNorm[0] = new Texture("../img/normal.png");  //shader bump mapping
-    texturasNorm[1] = nullptr;                           //shader luces colores
-    texturasNorm[2] = nullptr;                           //shader luces colores
-    texturasNorm[3] = nullptr;                           //shader simple
-    texturasNorm[4] = nullptr;
-    texturasNorm[5] = nullptr;
-    texturasNorm[6] = nullptr;
-    texturasNorm[7] = nullptr;
-    texturasNorm[8] = nullptr;
-    texturasNorm[0]->applyAnisotropicFilter();
-
-    for (int i = 0; i < numMallas; i++)
-        escena->addTextureAndModel3D(mallas[i], texturasColores[i], texturasEmis[i], texturasSpec[i], texturasNorm[i]);
-
-    escena->addNode(1, 0, 3, 4, 3);              //cubo en el centro orbitando en bump mapping
-    escena->addNode(2, 1, 3, 1, 2);              //cubos en orbitra iluminados por luces de distinto tipo con colores
-    escena->addNode(1, 3, 1, 0, 0);              //cubo basico en orbita
-    escena->addNode(numMallas - 4, 4, 3, 4, 2);  //modelo de goku cargado usando assimp
-
-    //Escena->cambiarTexturaColor(6, TexturasNorm[0]);
-    //Escena->eliminarNodo(0);
-
-    escena->setProjectionDeCamara(60.0f, 1.0f, 0.1f, 100.0f);
-
-    cubo1 = new BezierInterpolation(3.0f,BezierInterpolation::getCirclePoints(4.5f));
-    cubo2 = new SplinesInterpolation(5.0f,SplinesInterpolation::getCirclePoints(2.0f), SplinesInterpolation::getCircleTangents());
+    cubo1 = new BezierInterpolation(3.0f, BezierInterpolation::getCirclePoints(4.5f));
+    cubo2 = new SplinesInterpolation(5.0f, SplinesInterpolation::getCirclePoints(2.0f), SplinesInterpolation::getCircleTangents());
 
     //inicializamos el bucle de eventos
     glutMainLoop();
@@ -238,7 +202,7 @@ void destroy() {
 void renderFunc() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    escena->renderizarTodos();
+    escena->renderScene();
 
     //cambia entre el buffer front y el back
     //Es una llamada bloqueante, espera a que acabe todo para llamarse
@@ -248,7 +212,7 @@ void renderFunc() {
 void resizeFunc(int width, int height) {
     glViewport(0, 0, width, height);
 
-    escena->setProjectionDeCamara(60.0, float(width) / float(height), 0.1f, 100.0f);
+    camera->setProjection(60.0, float(width) / float(height), 0.1f, 100.0f);
 
     glutPostRedisplay();
 }
@@ -272,13 +236,14 @@ void idleFunc() {
     cubo2->increaseTime(0.01f);
     cubo1->increaseTime(0.01f);
 
-    glm::mat4 model3 = glm::translate(glm::mat4(1.0f), /**glm::vec3(2.0f)/**/cubo1->getPosition()/**/) * model1;  //model2=Trasladar el radio*rotate,
-    glm::mat4 model4 = glm::translate(glm::mat4(1.0f), /**glm::vec3(-2.0f)/**/cubo2->getPosition()/**/) * model1;          //model2=Trasladar el radio*rotate,
+    glm::mat4 model3 = glm::translate(glm::mat4(1.0f), /**glm::vec3(2.0f)/**/ cubo1->getPosition() /**/) * model1;   //model2=Trasladar el radio*rotate,
+    glm::mat4 model4 = glm::translate(glm::mat4(1.0f), /**glm::vec3(-2.0f)/**/ cubo2->getPosition() /**/) * model1;  //model2=Trasladar el radio*rotate,
 
-    escena->cambiarModel(0, model1);
-    escena->cambiarModel(1, model2);
-    escena->cambiarModel(2, model3);
-    escena->cambiarModel(3, model4);
+    /**/
+    movingNodes[0]->setModel(model1);
+    movingNodes[1]->setModel(model2);
+    movingNodes[2]->setModel(model3);
+    movingNodes[3]->setModel(model4);  //*/
     glutPostRedisplay();
 }
 
@@ -288,30 +253,30 @@ void keyboardFunc(unsigned char key, int x, int y) {
     //los glm::rotate y glm::translate se podr�an cambiar por la matriz hardcodeada, pero as� queda m�s claro
     switch (key) {
         case 'w':  //move hacia delante
-            escena->moveCamara(glm::vec3(0.0f, 0.0f, 1.0f));
+            camera->move(glm::vec3(0.0f, 0.0f, 1.0f));
             glutPostRedisplay();
             break;
         case 's':  //move hacia atras
-            escena->moveCamara(glm::vec3(0.0f, 0.0f, -1.0f));
+            camera->move(glm::vec3(0.0f, 0.0f, -1.0f));
             glutPostRedisplay();
             break;
         case 'a':  //move hacia la izquierda
-            escena->moveCamara(glm::vec3(1.0f, 0.0f, 0.0f));
+            camera->move(glm::vec3(1.0f, 0.0f, 0.0f));
             glutPostRedisplay();
             break;
         case 'd':  //move hacia la derecha
-            escena->moveCamara(glm::vec3(-1.0f, 0.0f, 0.0f));
+            camera->move(glm::vec3(-1.0f, 0.0f, 0.0f));
             glutPostRedisplay();
             break;
         case 'e':  //rotate hacia la derecha
-            escena->rotateCamaraUsandoView(-0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            camera->viewRotation(-0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
             glutPostRedisplay();
             break;
         case 'q':  //rotate hacia la izquierda
-            escena->rotateCamaraUsandoView(0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            camera->viewRotation(0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
             glutPostRedisplay();
             break;
-
+            /*
             //mover luz
         case 'o':  //mover hacia delante
             escena->moverLuz(luzSeleccionada, glm::vec3(0.0f, 0.0f, -1.0f), 0.05f);
@@ -376,7 +341,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
             escena->incrementarColorDeTodasLasLuces(glm::vec3(0.0f, 0.0f, -0.05f));
             //Escena->incrementarColorDeLuz(4, glm::vec3(0.0f, 0.0f, -0.05f));
             glutPostRedisplay();
-            break;
+            break;//*/
     }
 }
 
@@ -402,21 +367,21 @@ void mouseFunc(int button, int state, int x, int y) {
 
 void mouseMotionFunc(int x, int y) {
     //calculamos el �ngulo de rotaci�n horizontal
-    escena->rotateCamaraUsandoView(0.005f * float(x - xZero), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera->viewRotation(0.005f * float(x - xZero), glm::vec3(0.0f, 1.0f, 0.0f));
 
     //calculamos el �ngulo de rotaci�n vertical
     float yShift = float(y - yZero) * 0.005f;  //variable que determina el cambio a aplicar
     yAngle += yShift;                          //�ngulo tras el cambio
     //se establece que no rote m�s de 90� y menos de -90� para evitar acabar mirando de espaldas, lo que invertir�a derecha e izquierda
-    if (yAngle > 3.1416 / 2.0f) {          //si nos pasamos de 90�,
-        yShift -= (yAngle - 3.1416 / 2);   //reducimos yShift en la cantidad correspondiente
-        yAngle = 3.1416 / 2;               //y dejamos la cuenta en 90�
-    } else if (yAngle < -3.1416 / 2.0f) {  //si nos pasamos de -90�,
-        yShift -= (yAngle + 3.1416 / 2);   //reducimos yShift en la cantidad correspondiente
-        yAngle = -3.1416 / 2;              //y dejamos la cuenta en -90�
+    if (yAngle > glm::half_pi<float>()) {            //si nos pasamos de 90�,
+        yShift -= (yAngle - glm::half_pi<float>());  //reducimos yShift en la cantidad correspondiente
+        yAngle = glm::half_pi<float>();              //y dejamos la cuenta en 90�
+    } else if (yAngle < -glm::half_pi<float>()) {    //si nos pasamos de -90�,
+        yShift -= (yAngle + glm::half_pi<float>());  //reducimos yShift en la cantidad correspondiente
+        yAngle = -glm::half_pi<float>();             //y dejamos la cuenta en -90�
     }
 
-    escena->rotateCamara(yShift, glm::vec3(1.0f, 0.0f, 0.0f));
+    camera->rotate(yShift, glm::vec3(1.0f, 0.0f, 0.0f));
     //se actualizan los valores de xZero e yZero para que se pueda calcular correctamente el distance en el pr�ximo movimiento de rat�n
     xZero = x;
     yZero = y;
