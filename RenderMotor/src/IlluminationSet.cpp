@@ -13,10 +13,10 @@ void IlluminationSet::sendIlluminationToShader(glm::mat4 view) const {
         lightIt->light->sendColorToShader(lightIt->uLCol);
     }
 }
-void IlluminationSet::renderMaterials(glm::mat4 view, glm::mat4 proj) const {
+void IlluminationSet::renderMaterials(glm::mat4 view) const {
     sendIlluminationToShader(view);
     for (auto materialIt = materials.begin(); materialIt != materials.end(); ++materialIt) {
-        (*materialIt)->renderNodes(view, proj);
+        (*materialIt)->renderNodes(view);
     }
 }
 void IlluminationSet::addLight(Light* light) {

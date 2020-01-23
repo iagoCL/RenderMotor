@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\Control.h" />
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\IlluminationSet.h" />
     <ClInclude Include="src\Camera.h" />
@@ -23,6 +25,8 @@
     <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Animation.cpp" />
+    <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\IlluminationSet.cpp" />
     <ClCompile Include="src\BoxModel3D.cpp" />

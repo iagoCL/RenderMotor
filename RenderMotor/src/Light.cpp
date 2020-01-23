@@ -2,6 +2,7 @@
 
 #include <gl/glew.h>
 
+#define GLM_FORCE_RADIANS
 #include <gl/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,8 +39,15 @@ Light::Light()
 Light::~Light() {
 }
 
-void Light::increaseColor(glm::vec3 increase) {
+void Light::increaseColor(const glm::vec3& increase) {
     setColor(color + increase);
+}
+void Light::moveOrRotate(const glm::vec3& direction, const float value) {
+    if (type == 2) {
+        rotate(direction, value);
+    } else {
+        move(direction * value);
+    }
 }
 
 void Light::move(glm::vec3 distance) {

@@ -42,6 +42,12 @@
     <ClInclude Include="src\IlluminationSet.h">
       <Filter>src\motorGrafico</Filter>
     </ClInclude>
+    <ClInclude Include="src\Control.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animation.h">
+      <Filter>src\motorGrafico</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BoxModel3D.cpp">
@@ -78,6 +84,12 @@
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
     <ClCompile Include="src\IlluminationSet.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Control.cpp">
+      <Filter>src\motorGrafico</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animation.cpp">
       <Filter>src\motorGrafico</Filter>
     </ClCompile>
   </ItemGroup>

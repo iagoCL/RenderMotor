@@ -35,7 +35,7 @@ class Shader {
     Shader(const GLchar** vertString, const GLint vertStringLength, const GLchar** fragString, const GLint fragStringLength, Scene* scene_);
     ~Shader();
 
-    void renderShader(glm::mat4 view, glm::mat4 proj) const;
+    void renderShader(glm::mat4 view) const;
     void addIllumination(IlluminationSet* illumination);
 
     int getuNormalMat() const;

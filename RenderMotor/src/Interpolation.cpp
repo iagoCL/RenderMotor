@@ -1,25 +1,17 @@
 #include "Interpolation.h"
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-Interpolation::Interpolation(const float totalTime_)
-    : totalTime(totalTime_),
-      actualTime(0.0f) {
+Interpolation::Interpolation() {
 }
 
-void Interpolation::increaseTime(const float timeIncrease) {
-    actualTime += timeIncrease;
-    if (actualTime >= totalTime) {
-        actualTime = actualTime - floorf(actualTime / totalTime) * actualTime;
-    }
-}
-
-BezierInterpolation::BezierInterpolation(const float totalTime_, std::vector<glm::vec3>* controlPoints_)
-    : Interpolation(totalTime_),
-      timePerStep(totalTime_ / static_cast<float>(controlPoints_->size() / 2)),
+BezierInterpolation::BezierInterpolation(const float totalTime, std::vector<glm::vec3>* controlPoints_)
+    : Interpolation(),
+      timePerStep(totalTime / static_cast<float>(controlPoints_->size() / 2)),
       controlPoints(controlPoints_) {
 }
 std::vector<glm::vec3>* BezierInterpolation::getCirclePoints(const float radio) {
@@ -44,7 +36,7 @@ std::vector<glm::vec3>* BezierInterpolation::getCirclePoints(const float radio) 
     circleControlPoints->push_back(glm::vec3(0.0f, 0.0f, radio));
     return circleControlPoints;
 }
-glm::vec3 BezierInterpolation::getPosition() const {
+glm::vec3 BezierInterpolation::getPosition(const float actualTime) const {
     float stepNumber = floorf(actualTime / timePerStep);
 
     float stepTime = actualTime - stepNumber * timePerStep;
@@ -55,9 +47,9 @@ glm::vec3 BezierInterpolation::getPosition() const {
 BezierInterpolation::~BezierInterpolation() {
     delete controlPoints;
 }
-SplinesInterpolation::SplinesInterpolation(const float totalTime_, std::vector<glm::vec3>* controlPoints_, std::vector<float>* controlTangents_)
-    : Interpolation(totalTime_),
-      timePerStep(totalTime_ / static_cast<float>(controlPoints_->size() - 1)),
+SplinesInterpolation::SplinesInterpolation(const float totalTime, std::vector<glm::vec3>* controlPoints_, std::vector<float>* controlTangents_)
+    : Interpolation(),
+      timePerStep(totalTime / static_cast<float>(controlPoints_->size() - 1)),
       controlPoints(controlPoints_),
       controlTangents(controlTangents_) {
 }
@@ -92,7 +84,7 @@ std::vector<float>* SplinesInterpolation::getCircleTangents() {
 
     return circleControlTangents;
 }
-glm::vec3 SplinesInterpolation::getPosition() const {
+glm::vec3 SplinesInterpolation::getPosition(const float actualTime) const {
     float stepNumber = floorf(actualTime / timePerStep);
 
     float stepTime = actualTime - stepNumber * timePerStep;

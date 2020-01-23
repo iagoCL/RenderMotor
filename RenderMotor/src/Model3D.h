@@ -15,7 +15,6 @@
 
 class Model3D {
    private:
-
     GLuint modelVAO = 0;
     GLuint positionVBO = 0;
     GLuint colorVBO = 0;

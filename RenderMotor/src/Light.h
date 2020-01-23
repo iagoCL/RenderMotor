@@ -1,6 +1,7 @@
 #ifndef RENDER_MOTOR_LIGHT_H
 #define RENDER_MOTOR_LIGHT_H
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
 class Light {
@@ -24,7 +25,8 @@ class Light {
     void sendToShader(glm::mat4 view, unsigned int positionId, unsigned int directionId = -1, unsigned int angleId = -1) const;
     void sendColorToShader(unsigned int id) const;
 
-    void increaseColor(glm::vec3 colorIncrease);
+    void increaseColor(const glm::vec3& colorIncrease);
+    void moveOrRotate(const glm::vec3& direction, const float value);
     void move(glm::vec3 distance);
     void rotate(glm::vec3 rotation, float angle);
     int getType() const;

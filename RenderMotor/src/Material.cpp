@@ -11,10 +11,10 @@ IlluminationSet* Material::getIlluminationSet() const {
 void Material::addNode(Node* node) {
     nodes.push_back(node);
 }
-void Material::renderNodes(glm::mat4 view, glm::mat4 proj) const {
+void Material::renderNodes(glm::mat4 view) const {
     activateMaterial(view);
     for (auto nodeIt = nodes.begin(); nodeIt != nodes.end(); ++nodeIt) {
-        (*nodeIt)->renderNode(view, proj);
+        (*nodeIt)->renderNode();
     }
 }
 SimpleMaterial::SimpleMaterial(IlluminationSet* illuminationSet_)

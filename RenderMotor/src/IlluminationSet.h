@@ -33,7 +33,7 @@ class IlluminationSet {
    public:
     IlluminationSet(Shader* shader_);
     Shader* getShader() const;
-    void renderMaterials(glm::mat4 view, glm::mat4 proj) const;
+    void renderMaterials(glm::mat4 view) const;
     void addLight(Light* light);
     void addMaterial(Material* material);
 };

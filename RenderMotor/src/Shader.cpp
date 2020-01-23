@@ -31,10 +31,10 @@ Shader::~Shader() {
 void Shader::addIllumination(IlluminationSet *illumination) {
     illuminations.push_back(illumination);
 }
-void Shader::renderShader(glm::mat4 view, glm::mat4 proj) const {
+void Shader::renderShader(glm::mat4 view) const {
     glUseProgram(program);
     for (auto itIllumination = illuminations.begin(); itIllumination != illuminations.end(); ++itIllumination) {
-        (*itIllumination)->renderMaterials(view, proj);
+        (*itIllumination)->renderMaterials(view);
     }
 }
 int Shader::loadShader(const GLchar **shaderString, const GLint stringLength, const int type) const {

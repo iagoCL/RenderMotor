@@ -17,7 +17,7 @@ class Material {
     virtual IlluminationSet* getIlluminationSet() const;
     virtual void activateMaterial(glm::mat4 view) const = 0;
     virtual void addNode(Node* node);
-    virtual void renderNodes(glm::mat4 view, glm::mat4 proj) const;
+    virtual void renderNodes(glm::mat4 view) const;
 };
 
 class SimpleMaterial : public Material {

@@ -117,7 +117,7 @@ Model3D** Model3D::loadFromFile(int& numberModels, std::string pathToFile) {
     }
 
     else {
-        std::cout << "Scene loaded from file. Computing number of" << std::endl;
+        std::cout << "Scene loaded from file. Computing number of meshes" << std::endl;
         int numMeshes = fileScene->mNumMeshes;
         numberModels += fileScene->mNumMeshes;
         std::cout << "Scene with " << numMeshes << " meshes loaded." << std::endl;

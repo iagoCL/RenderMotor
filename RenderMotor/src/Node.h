@@ -3,23 +3,41 @@
 
 #include <iostream>
 #include <vector>
+#include "Animation.h"
 #include "Model3D.h"
 #include "Shader.h"
 
 class Shader;
 class Material;
+class Animation;
 class Node {
-   private:
+   protected:
     Model3D* mesh;
     Shader* shader;
     Material* material;
-    glm::mat4 modelMatrix;
+
+    glm::mat4 model;
+    glm::mat4 modelView;
+    glm::mat4 modelViewProj;
+    glm::mat4 normal;
 
    public:
     Node(Model3D* mesh_, Material* material_);
-    void renderNode(glm::mat4 view, glm::mat4 proj) const;
-    void setModel(glm::mat4 modelMatrix_);
+    virtual void renderNode() const;
+    virtual void updateNode(const float timeIncrease, glm::mat4 view, glm::mat4 proj);
+    void setModel(glm::mat4 model);
+
+    virtual Shader* getShader() const;
+    virtual Material* getMaterial() const;
 
     ~Node();
+};
+class NodeAnimated : public Node {
+   protected:
+    Animation* animation;
+
+   public:
+    NodeAnimated(Model3D* mesh_, Material* material_, Animation* animation_);
+    virtual void updateNode(const float timeIncrease, glm::mat4 view, glm::mat4 proj) override;
 };
 #endif  //RENDER_MOTOR_NODE_H
