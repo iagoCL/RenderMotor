@@ -26,23 +26,34 @@ class SimpleMaterial : public Material {
     void activateMaterial(const glm::mat4& view) const override;
 };
 
-class BumpMaterial : public Material {
+class SimpleTextureMaterial : public Material {
    protected:
-    Texture* diffuseText;
-    Texture* emissiveText;
-    Texture* specularText;
-    Texture* normalsText;
+    const Texture* diffuseText;
 
-    //uniformes luz
-    int* uLPos;
-    int* uLDir;
-    int* uLCol;
-    int* uLAngle;
-
-    //Uniform Textures
     int uColorTex;
+
+   public:
+    SimpleTextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_);
+    void activateMaterial(const glm::mat4& view) const override;
+};
+
+class TextureMaterial : public SimpleTextureMaterial {
+   protected:
+    const Texture* emissiveText;
+    const Texture* specularText;
+
     int uEmiTex;
     int uSpecTex;
+
+   public:
+    TextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_);
+    void activateMaterial(const glm::mat4& view) const override;
+};
+
+class BumpMaterial : public TextureMaterial {
+   protected:
+    const Texture* normalsText;
+
     int uNormTex;
 
    public:

@@ -19,7 +19,6 @@ Scene::Scene(Camera* camera_)
     : camera(camera_),
       control(new Control(this)),
       framesUpdateFPS(static_cast<unsigned int>(8e8)) {
-    currentScene = this;
 }
 
 void Scene::renderScene() {
@@ -178,4 +177,8 @@ void Scene::mouseMotionFuncCall(int x, int y) {
     } else {
         std::cout << "ERROR: hadeling mouse movement; current scene or control null.";
     }
+}
+void Scene::setCurrentScene(Scene* scene_){
+    currentScene = scene_;
+    scene_->start();
 }

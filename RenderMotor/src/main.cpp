@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 
     Shader* simpleShader = new Shader("../shaders/shader.v0.vert", "../shaders/shader.v0.frag", scene);
     IlluminationSet* pointLightSet = new IlluminationSet(simpleShader);
-    Light* basicPointLight = new Light(glm::vec3(0.0f, 0.0f, 11.0f), glm::vec3(0.7f));
+    Light* basicPointLight = new LightPoint(glm::vec3(0.0f, 0.0f, 11.0f), glm::vec3(0.7f));
     pointLightSet->addLight(basicPointLight);
     control->addLight(basicPointLight);
     Material* simpleMaterial = new SimpleMaterial(pointLightSet);
@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
 
     Shader* bumpShader = new Shader("../shaders/shader.v3.vert", "../shaders/shader.v3.frag", scene);
     IlluminationSet* bumpLightSet = new IlluminationSet(bumpShader);
-    Light* redFocalLight = new Light(glm::vec3(0.0f, 0.0f, 8.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, -1.0), 0.08f);
-    Light* pointLight = new Light(glm::vec3(-7.0, 0.0, 3.0), glm::vec3(0.8f));
-    Light* directionalLight = new Light(glm::vec3(0.0, -1.0, -1.0), glm::vec3(0.5f), 2);
+    Light* redFocalLight = dynamic_cast<Light*>(dynamic_cast<LightDirectional*>(new LightFocal(glm::vec3(0.0f, 0.0f, 8.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), 0.08f)));
+    Light* pointLight = new LightPoint(glm::vec3(-7.0, 0.0, 3.0), glm::vec3(0.8f));
+    Light* directionalLight = new LightDirectional(glm::vec3(0.0, -1.0, -1.0), glm::vec3(0.5f));
     bumpLightSet->addLight(redFocalLight);
     bumpLightSet->addLight(pointLight);
     bumpLightSet->addLight(directionalLight);
@@ -94,13 +94,13 @@ int main(int argc, char** argv) {
     /**/
     Shader* diffuseShader = new Shader("../shaders/shader.v2.vert", "../shaders/shader.v2.frag", scene);
     IlluminationSet* diffuseMultiColorLightSet = new IlluminationSet(diffuseShader);
-    Light* blueFocalLight = new Light(glm::vec3(-3.0, 3.0, 3.0), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(3.0, -3.0, -3.0), 0.5f);
-    Light* redPointLight = new Light(glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    Light* greenDirectionalLight = new Light(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 1.0f, 0.0f), 2);
+    Light* blueFocalLight = dynamic_cast<Light*>(dynamic_cast<LightDirectional*>(new LightFocal(glm::vec3(-3.0, 3.0, 3.0), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(3.0f, -3.0f, -3.0f), 0.5f)));
+    Light* redPointLight = new LightPoint(glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    Light* greenDirectionalLight = new LightDirectional(glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 1.0f, 0.0f));
     diffuseMultiColorLightSet->addLight(blueFocalLight);
     diffuseMultiColorLightSet->addLight(redPointLight);
     diffuseMultiColorLightSet->addLight(greenDirectionalLight);
-    Material* cubeDiffuseMaterial = new BumpMaterial(diffuseMultiColorLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture, nullptr);
+    Material* cubeDiffuseMaterial = new TextureMaterial(diffuseMultiColorLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture);
 
     Interpolation* bezierInterpolation = new BezierInterpolation(4.0f, BezierInterpolation::getCirclePoints(4.5f));
     Animation* interpolationBezierAnimation = new AnimationWithInterpolation(4.0f, interpolationFunction, bezierInterpolation);
@@ -133,14 +133,14 @@ int main(int argc, char** argv) {
         assimpModel[i]->initObject();
         Texture* modelTexture = new Texture(texturesPaths[i]);
         modelTexture->applyAnisotropicFilter();
-        Material* tmpMaterial = new BumpMaterial(diffuseNormalLightSet, modelTexture, blackTexture, blackTexture, nullptr);
+        Material* tmpMaterial = new TextureMaterial(diffuseNormalLightSet, modelTexture, blackTexture, blackTexture);
         Node* tmpNode = new Node(assimpModel[i], tmpMaterial);
     }
     const auto end = std::chrono::high_resolution_clock::now();
     const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     std::cout << "Scene loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 
-    scene->start();
+    Scene::setCurrentScene(scene);
 
     return 0;
 }

@@ -4,6 +4,32 @@ Material::Material(IlluminationSet* illuminationSet_)
     : illuminationSet(illuminationSet_) {
     illuminationSet_->addMaterial(this);
 }
+SimpleMaterial::SimpleMaterial(IlluminationSet* illuminationSet_)
+    : Material(illuminationSet_) {
+}
+SimpleTextureMaterial::SimpleTextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_)
+    : Material(illuminationSet_),
+      diffuseText(diffuseText_) {
+    unsigned int program = illuminationSet_->getShader()->getProgram();
+
+    uColorTex = glGetUniformLocation(program, "colorTex");
+}
+TextureMaterial::TextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_)
+    : SimpleTextureMaterial(illuminationSet_, diffuseText_),
+      emissiveText(emissiveText_),
+      specularText(specularText_) {
+    unsigned int program = illuminationSet_->getShader()->getProgram();
+
+    uEmiTex = glGetUniformLocation(program, "emiTex");
+    uSpecTex = glGetUniformLocation(program, "specularTex");
+}
+BumpMaterial::BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_, Texture* normalsText_)
+    : TextureMaterial(illuminationSet_, diffuseText_, emissiveText_, specularText_),
+      normalsText(normalsText_) {
+    unsigned int program = illuminationSet_->getShader()->getProgram();
+
+    uNormTex = glGetUniformLocation(program, "normalTex");
+}
 IlluminationSet* Material::getIlluminationSet() const {
     return illuminationSet;
 }
@@ -17,25 +43,24 @@ void Material::renderNodes(const glm::mat4& view) const {
         (*nodeIt)->renderNode();
     }
 }
-SimpleMaterial::SimpleMaterial(IlluminationSet* illuminationSet_)
-    : Material(illuminationSet_) {
-}
 void SimpleMaterial::activateMaterial(const glm::mat4& view) const {
 }
-BumpMaterial::BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_, Texture* normalsText_)
-    : Material(illuminationSet_),
-      diffuseText(diffuseText_),
-      emissiveText(emissiveText_),
-      specularText(specularText_),
-      normalsText(normalsText_) {
-    unsigned int program = illuminationSet_->getShader()->getProgram();
-
-    uColorTex = glGetUniformLocation(program, "colorTex");
-    uEmiTex = glGetUniformLocation(program, "emiTex");
-    uSpecTex = glGetUniformLocation(program, "specularTex");
-    uNormTex = glGetUniformLocation(program, "normalTex");
+void SimpleTextureMaterial::activateMaterial(const glm::mat4& view) const {
+    if (uColorTex != -1 && diffuseText) {
+        diffuseText->sendToShaderProgram(uColorTex);
+    }
 }
-
+void TextureMaterial::activateMaterial(const glm::mat4& view) const {
+    if (uColorTex != -1 && diffuseText) {
+        diffuseText->sendToShaderProgram(uColorTex);
+    }
+    if (uEmiTex != -1 && emissiveText) {
+        emissiveText->sendToShaderProgram(uEmiTex);
+    }
+    if (uSpecTex != -1 && specularText) {
+        specularText->sendToShaderProgram(uSpecTex);
+    }
+}
 void BumpMaterial::activateMaterial(const glm::mat4& view) const {
     if (uColorTex != -1 && diffuseText) {
         diffuseText->sendToShaderProgram(uColorTex);

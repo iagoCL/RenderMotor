@@ -39,12 +39,12 @@ class Scene {
     static void keyboardFuncCall(unsigned char key, int x, int y);
     static void mouseFuncCall(int button, int state, int x, int y);
     static void mouseMotionFuncCall(int x, int y);
+    void start();
 
    public:
     Scene(Camera* camera_ = new Camera());
     static void initOpenGL(int argc, char** argv, const char* windowTitle, const int windowSizeX = 500, const int windowSizeY = 500, const int windowPositionX = 0, const int windowPositionY = 0);
-    void start();
-
+    static void setCurrentScene(Scene* scene_);
     void renderScene();
     void updateScene();
 

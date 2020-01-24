@@ -12,26 +12,37 @@ Control::Control(Scene* scene_)
       mouseYAngle(0.0f) {
 }
 void Control::keyboardFunc(unsigned char key, int x, int y) {
-    std::cout << "Pressed key: " << key << " at: {" << x << ", " << y << "}" << std::endl
-              << std::endl;
+    std::cout << "Pressed key: " << key << " at: {" << x << ", " << y << "}" << std::endl;
     switch (key) {
         case 'w':
             scene->getCamera()->move(glm::vec3(0.0f, 0.0f, 1.0f));
+            std::cout << "Camera moved." << std::endl
+                      << std::endl;
             break;
         case 's':
             scene->getCamera()->move(glm::vec3(0.0f, 0.0f, -1.0f));
+            std::cout << "Camera moved." << std::endl
+                      << std::endl;
             break;
         case 'a':
             scene->getCamera()->move(glm::vec3(1.0f, 0.0f, 0.0f));
+            std::cout << "Camera moved." << std::endl
+                      << std::endl;
             break;
         case 'd':
             scene->getCamera()->move(glm::vec3(-1.0f, 0.0f, 0.0f));
+            std::cout << "Camera moved." << std::endl
+                      << std::endl;
             break;
         case 'e':
             scene->getCamera()->viewRotation(-0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            std::cout << "Camera rotated." << std::endl
+                      << std::endl;
             break;
         case 'q':
             scene->getCamera()->viewRotation(0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            std::cout << "Camera rotated." << std::endl
+                      << std::endl;
             break;
             /**/
             //Moving Light
@@ -58,6 +69,8 @@ void Control::keyboardFunc(unsigned char key, int x, int y) {
                 if (++selectedLightIt == lights.end()) {
                     selectedLightIt = lights.begin();
                 }
+                std::cout << "Selected light: " << (*selectedLightIt)->toString() << std::endl
+                          << std::endl;
             }
             break;
         case '7':
@@ -78,18 +91,25 @@ void Control::keyboardFunc(unsigned char key, int x, int y) {
         case '6':
             increaseLightsColors(glm::vec3(0.0f, 0.0f, -0.05f));
             break;
+        default:
+            std::cout << "Key has not associated action." << std::endl
+                      << std::endl;
+            break;
     }
 }
 
 void Control::moveOrRotateSelectedLight(const glm::vec3& direction, const float value) {
     if (!lights.empty()) {
         (*selectedLightIt)->moveOrRotate(direction, value);
+        std::cout << "Light changed to: " << (*selectedLightIt)->toString() << std::endl;
     }
 }
 void Control::increaseLightsColors(const glm::vec3& colorIncrease) {
     for (auto const& lightIt : lights) {
         lightIt->increaseColor(colorIncrease);
     }
+    std::cout << "Light color changed." << std::endl
+              << std::endl;
 }
 void Control::addLight(Light* light) {
     lights.push_back(light);
