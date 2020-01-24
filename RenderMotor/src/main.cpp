@@ -1,6 +1,7 @@
 #include <gl/glew.h>
 
 #define GLM_FORCE_RADIANS
+#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,7 +17,10 @@
 #include "Shader.h"
 #include "Texture.h"
 
+static const float PI_DOUBLE = 2.0f * glm::pi<float>();
+
 int main(int argc, char** argv) {
+    const auto start = std::chrono::high_resolution_clock::now();
     Control::showControls();
     Scene::initOpenGL(argc, argv, "Render example");
     Camera* camera = new Camera();
@@ -30,28 +34,27 @@ int main(int argc, char** argv) {
 
     auto interpolationFunction = [](const float actualTime, Interpolation* interpolation) {
         float angle = 11.0f * actualTime;
-        if (angle > (2.0f * glm::pi<float>())) {
-            angle -= floorf(angle / (2.f * glm::pi<float>())) * angle;
+        if (angle > PI_DOUBLE) {
+            angle -= PI_DOUBLE;
         }
-        glm::mat4 model = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));  //Rotates the cube
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 1.0f));  //Rotates the cube
         return glm::translate(glm::mat4(1.0f), interpolation->getPosition(actualTime)) * model;
     };
     auto cubeVectorRotationUpdate = [](const float actualTime) {
-        float angle = 10.5f * actualTime;
-        if (angle > (2.0f * glm::pi<float>())) {
-            angle -= floorf(angle / (2.f * glm::pi<float>())) * angle;
+        float angle = 0.4f * actualTime;
+        if (angle > PI_DOUBLE) {
+            angle -= PI_DOUBLE;
         }
         glm::mat4 model = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f)), angle, glm::vec3(0.0f, 1.0f, 0.0f));  //Translate the cube
-        angle = 4.5f * actualTime;
-        if (angle > (2.0f * glm::pi<float>())) {
-            angle -= floorf(angle / (2.f * glm::pi<float>())) * angle;
+        if (angle > PI_DOUBLE) {
+            angle -= PI_DOUBLE;
         }
-        return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * model;  //Rotates the cube
+        return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 1.0f)) * model;  //Rotates the cube
     };
     auto cubeCenterRotationUpdate = [](const float actualTime) {
-        float angle = 5 * actualTime;
-        if (angle > (2.0f * glm::pi<float>())) {
-            angle -= floorf(angle / (2.f * glm::pi<float>())) * angle;
+        float angle = 4.0f * actualTime;
+        if (angle > PI_DOUBLE) {
+            angle -= PI_DOUBLE;
         }
         return glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));  //Rotates the cube
     };
@@ -62,7 +65,7 @@ int main(int argc, char** argv) {
     pointLightSet->addLight(basicPointLight);
     control->addLight(basicPointLight);
     Material* simpleMaterial = new SimpleMaterial(pointLightSet);
-    Animation* vectorRotationAnimation = new Animation(4.5f, cubeVectorRotationUpdate);
+    Animation* vectorRotationAnimation = new Animation(PI_DOUBLE / 0.4f, cubeVectorRotationUpdate);
     Node* simpleNode = new NodeAnimated(cubeMesh, simpleMaterial, vectorRotationAnimation);
 
     Texture* diffuseCubeTexture = new Texture("../img/color2.png");
@@ -86,7 +89,7 @@ int main(int argc, char** argv) {
     control->addLight(pointLight);
     control->addLight(directionalLight);
     Material* bumpMaterial = new BumpMaterial(bumpLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture, normCubeTexture);
-    Animation* centerRotationAnimation = new Animation(1.5f, cubeCenterRotationUpdate);
+    Animation* centerRotationAnimation = new Animation(glm::pi<float>(), cubeCenterRotationUpdate);
     Node* bumpNode = new NodeAnimated(cubeMesh, bumpMaterial, centerRotationAnimation);
     /**/
     Shader* diffuseShader = new Shader("../shaders/shader.v2.vert", "../shaders/shader.v2.frag", scene);
@@ -99,12 +102,12 @@ int main(int argc, char** argv) {
     diffuseMultiColorLightSet->addLight(greenDirectionalLight);
     Material* cubeDiffuseMaterial = new BumpMaterial(diffuseMultiColorLightSet, diffuseCubeTexture, emissiveCubeTexture, specularCubeTexture, nullptr);
 
-    Interpolation* bezierInterpolation = new BezierInterpolation(3.0f, BezierInterpolation::getCirclePoints(4.5f));
-    Animation* interpolationBezierAnimation = new AnimationWithInterpolation(3.0f, interpolationFunction, bezierInterpolation);
+    Interpolation* bezierInterpolation = new BezierInterpolation(4.0f, BezierInterpolation::getCirclePoints(4.5f));
+    Animation* interpolationBezierAnimation = new AnimationWithInterpolation(4.0f, interpolationFunction, bezierInterpolation);
     Node* diffuseNode2 = new NodeAnimated(cubeMesh, cubeDiffuseMaterial, interpolationBezierAnimation);
 
-    Interpolation* splinesInterpolation = new SplinesInterpolation(5.0f, SplinesInterpolation::getCirclePoints(2.0f), SplinesInterpolation::getCircleTangents());
-    Animation* interpolationSplinesAnimation = new AnimationWithInterpolation(5.0f, interpolationFunction, splinesInterpolation);
+    Interpolation* splinesInterpolation = new SplinesInterpolation(4.0f, SplinesInterpolation::getCirclePoints(2.0f), SplinesInterpolation::getCircleTangents());
+    Animation* interpolationSplinesAnimation = new AnimationWithInterpolation(4.0f, interpolationFunction, splinesInterpolation);
     Node* diffuseNode3 = new NodeAnimated(cubeMesh, cubeDiffuseMaterial, interpolationSplinesAnimation);
 
     Texture* blackTexture = new Texture("../img/black.png");
@@ -133,6 +136,10 @@ int main(int argc, char** argv) {
         Material* tmpMaterial = new BumpMaterial(diffuseNormalLightSet, modelTexture, blackTexture, blackTexture, nullptr);
         Node* tmpNode = new Node(assimpModel[i], tmpMaterial);
     }
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Scene loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
+
     scene->start();
 
     return 0;

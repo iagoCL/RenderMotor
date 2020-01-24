@@ -7,9 +7,10 @@
 
 class Texture {
    private:
-    int textureNumber;
-    GLuint textureId;
-    Texture(unsigned int textureId_, int textureNumber_);
+    const int textureNumber;
+    const GLuint textureId;
+
+    Texture(const int textureId_, const GLuint textureNumber_);
     unsigned char *readTextureFromFile(const char *fileName, unsigned int &width, unsigned int &height);
     GLuint loadTexture(const char *fileName);
 
@@ -18,7 +19,7 @@ class Texture {
 
     Texture(const char *fileName);
     ~Texture();
-    void sendToShaderProgram(unsigned int uniformId) const;
+    void sendToShaderProgram(const unsigned int uniformId) const;
     void applyAnisotropicFilter() const;
 };
 #endif  //RENDER_MOTOR_TEXTURE_H

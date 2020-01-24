@@ -28,12 +28,12 @@ class IlluminationSet {
     std::vector<Material*> materials;
     std::vector<LightRenderInfo> lights;
 
-    void sendIlluminationToShader(glm::mat4 view) const;
+    void sendIlluminationToShader(const glm::mat4& view) const;
 
    public:
     IlluminationSet(Shader* shader_);
     Shader* getShader() const;
-    void renderMaterials(glm::mat4 view) const;
+    void renderMaterials(const glm::mat4& view) const;
     void addLight(Light* light);
     void addMaterial(Material* material);
 };

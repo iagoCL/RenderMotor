@@ -2,11 +2,12 @@
 
 #include <FreeImage.h>
 #include <windows.h>
+#include <chrono>
 #include <iostream>
 
 int Texture::numberOfTextures = 0;
 
-Texture::Texture(GLuint textureId_, int textureNumber_)
+Texture::Texture(const int textureId_, const GLuint textureNumber_)
     : textureId(textureId_), textureNumber(textureNumber_) {
 }
 
@@ -20,7 +21,7 @@ Texture::~Texture() {
 }
 
 GLuint Texture::loadTexture(const char *fileName) {  //Loads the texture in memory
-
+    const auto start = std::chrono::high_resolution_clock::now();
     unsigned int width, height;
     unsigned char *map = readTextureFromFile(fileName, width, height);
     if (!map) {
@@ -44,6 +45,10 @@ GLuint Texture::loadTexture(const char *fileName) {  //Loads the texture in memo
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Texture: " << fileName << " loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
+
     return texId;
 }
 
@@ -93,7 +98,7 @@ unsigned char *Texture::readTextureFromFile(const char *fileName, unsigned int &
     return map;
 }
 
-void Texture::sendToShaderProgram(unsigned int uniformId) const {
+void Texture::sendToShaderProgram(const unsigned int uniformId) const {
     glActiveTexture(GL_TEXTURE0 + textureNumber);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glUniform1i(uniformId, textureNumber);

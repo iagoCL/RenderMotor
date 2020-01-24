@@ -37,12 +37,12 @@ class Model3D {
 
    public:
     Model3D(const int numTriangles_, const int numVertices_, unsigned int* trianglesArray_ = nullptr, float* colorsArray_ = nullptr, float* normalArray_ = nullptr, float* positionsArray_ = nullptr, float* tangentArray_ = nullptr, float* textCoordArray_ = nullptr);
-    Model3D(aiMesh* c);
-    static Model3D** loadFromFile(int& numberModels, std::string pathToFile);
+    Model3D(aiMesh* assimpMesh);
+    static Model3D** loadFromFile(int& numberModels, const std::string pathToFile);
     ~Model3D();
     void initObject();
     void renderModel() const;
-    void recomputeNormalsAndTangents(bool checkDuplicates = true);
+    void recomputeNormalsAndTangents(const bool checkDuplicates = true);
     void combineSimilarVertices(const bool checkColorAndTextures = true);
 
     int getNumTriangles() const;

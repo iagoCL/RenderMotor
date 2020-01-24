@@ -15,15 +15,15 @@ class Material {
    public:
     Material(IlluminationSet* illuminationSet);
     virtual IlluminationSet* getIlluminationSet() const;
-    virtual void activateMaterial(glm::mat4 view) const = 0;
+    virtual void activateMaterial(const glm::mat4& view) const = 0;
     virtual void addNode(Node* node);
-    virtual void renderNodes(glm::mat4 view) const;
+    virtual void renderNodes(const glm::mat4& view) const;
 };
 
 class SimpleMaterial : public Material {
    public:
     SimpleMaterial(IlluminationSet* illuminationSet_);
-    void activateMaterial(glm::mat4 view) const override;
+    void activateMaterial(const glm::mat4& view) const override;
 };
 
 class BumpMaterial : public Material {
@@ -47,7 +47,7 @@ class BumpMaterial : public Material {
 
    public:
     BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_, Texture* normalsText_);
-    void activateMaterial(glm::mat4 view) const override;
+    void activateMaterial(const glm::mat4& view) const override;
 };
 
 #endif  //RENDER_MOTOR_MATERIAL_H

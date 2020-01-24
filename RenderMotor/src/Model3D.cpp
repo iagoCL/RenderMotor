@@ -2,6 +2,7 @@
 
 #define GLM_FORCE_RADIANS
 #include <math.h>
+#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -25,6 +26,7 @@ Model3D::Model3D(const int numTriangles_, const int numVertices_, unsigned int* 
 }
 
 Model3D::Model3D(aiMesh* importedMesh) {
+    const auto start = std::chrono::high_resolution_clock::now();
     std::cout << "Obtained model mesh:" << std::endl;
 
     numTriangles = importedMesh->mNumFaces;
@@ -103,10 +105,13 @@ Model3D::Model3D(aiMesh* importedMesh) {
         std::cout << "WARNING: skipping vertex tangents, the mesh does not contained them." << std::endl;
         tangentsArray = nullptr;
     }
-    std::cout << "Obtained the vertices tangents. Crating the model." << std::endl;
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Model loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
-Model3D** Model3D::loadFromFile(int& numberModels, std::string pathToFile) {
+Model3D** Model3D::loadFromFile(int& numberModels, const std::string pathToFile) {
+    const auto start = std::chrono::high_resolution_clock::now();
     std::cout << "\nStarting loading process. Please wait some seconds." << std::endl;
     Assimp::Importer importer;
     const aiScene* fileScene = importer.ReadFile(pathToFile, 0 /*Avoid postprocessing, Options to compute normalas/tangents, triangulate, optimize, etc.*/);
@@ -120,7 +125,7 @@ Model3D** Model3D::loadFromFile(int& numberModels, std::string pathToFile) {
         std::cout << "Scene loaded from file. Computing number of meshes" << std::endl;
         int numMeshes = fileScene->mNumMeshes;
         numberModels += fileScene->mNumMeshes;
-        std::cout << "Scene with " << numMeshes << " meshes loaded." << std::endl;
+        std::cout << "Loading scene with " << numMeshes << " meshes." << std::endl;
         Model3D** sceneMeshes = new Model3D*[numMeshes];
         for (int i = 0; i < numMeshes; i++) {
             std::cout << std::endl
@@ -130,11 +135,9 @@ Model3D** Model3D::loadFromFile(int& numberModels, std::string pathToFile) {
                       << std::endl;
             sceneMeshes[i] = new Model3D(fileScene->mMeshes[i]);
         }
-        std::cout << std::endl
-                  << std::endl
-                  << std::endl
-                  << "All meshes of the scene loaded." << std::endl
-                  << std::endl;
+        const auto end = std::chrono::high_resolution_clock::now();
+        const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+        std::cout << "Scene with: " << numMeshes << " loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 
         return sceneMeshes;
     }
@@ -154,6 +157,8 @@ Model3D::~Model3D() {
 }
 
 void Model3D::initObject() {
+    const auto start = std::chrono::high_resolution_clock::now();
+
     glGenVertexArrays(1, &modelVAO);
     glBindVertexArray(modelVAO);
 
@@ -192,6 +197,9 @@ void Model3D::initObject() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numTriangles * sizeof(unsigned int) * 3, trianglesArray, GL_STATIC_DRAW);
 
     linkShaderVBOs();
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Model inited in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
 void Model3D::linkShaderVBOs() {
@@ -231,11 +239,12 @@ int Model3D::getVAO() const {
     return modelVAO;
 }
 
-void Model3D::recomputeNormalsAndTangents(bool checkDuplicates) {
+void Model3D::recomputeNormalsAndTangents(const bool checkDuplicates) {
+    const auto start = std::chrono::high_resolution_clock::now();
     glm::vec3* newTangetsArray = new glm::vec3[numVertices];
     glm::vec3* newNormalArray = new glm::vec3[numVertices];
     glm::vec3* newPositionArray = new glm::vec3[numVertices];
-    std::cout << "Recomputing tangents and normals...";
+    std::cout << "Recomputing tangents and normals..." << std::endl;
     for (int i = 0; i < numVertices; i++) {
         newTangetsArray[i] = newNormalArray[i] = glm::vec3(0.0f);
         newPositionArray[i] = glm::vec3(positionsArray[3 * i], positionsArray[3 * i + 1], positionsArray[3 * i + 2]);
@@ -333,9 +342,13 @@ void Model3D::recomputeNormalsAndTangents(bool checkDuplicates) {
     }
     delete[] newTangetsArray;
     delete[] newNormalArray;
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Normals and tangents recomputed in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
 void Model3D::combineSimilarVertices(const bool checkColorAndTextures) {
+    const auto start = std::chrono::high_resolution_clock::now();
     std::cout << "Simplifying mesh with: " << numVertices << " vertices." << std::endl;
     std::vector<glm::vec3> tempPositions;
     std::vector<float> tempNormals;
@@ -403,7 +416,7 @@ void Model3D::combineSimilarVertices(const bool checkColorAndTextures) {
             }
         }
     }
-    std::cout << "Model from: " << numVertices << " vertices to " << tempPositions.size() << " vertices." << std::endl;
+    int oldNumVertices = numVertices;
     numVertices = tempPositions.size();
     delete[] positionsArray;
     positionsArray = new float[numVertices * 3];
@@ -448,10 +461,14 @@ void Model3D::combineSimilarVertices(const bool checkColorAndTextures) {
             textCoordArray[vertexId++] = it->y;
         }
     }
-    std::cout << "Completed model simplification." << std::endl;
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Completed model simplification from " << oldNumVertices << " vertices to " << numVertices << " vertices in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
 Model3D* Model3D::allocateModel3D(const int numTriangles_, const int numVertices_, const unsigned int* trianglesArray_, const float* colorsArray_, const float* normalArray_, const float* positionsArray_, const float* tangentArray_, const float* textCoordArray_) {
+    const auto start = std::chrono::high_resolution_clock::now();
+
     unsigned int* trianglesArrayAux = new unsigned int[3 * numTriangles_];
     float* colorsArrayAux = new float[3 * numVertices_];
     float* normalsArrayAux = new float[3 * numVertices_];
@@ -470,6 +487,10 @@ Model3D* Model3D::allocateModel3D(const int numTriangles_, const int numVertices
     for (int i = 0, length = 2 * numVertices_; i < length; ++i) {
         textCoordArrayAux[i] = textCoordArray_[i];
     }
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Model allocated in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
+
     return new Model3D(numTriangles_, numVertices_, trianglesArrayAux, colorsArrayAux, normalsArrayAux, positionsArrayAux, tangentsArrayAux, textCoordArrayAux);
 }
 

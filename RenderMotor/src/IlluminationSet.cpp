@@ -7,13 +7,13 @@ IlluminationSet::IlluminationSet(Shader* shader_)
 Shader* IlluminationSet::getShader() const {
     return shader;
 }
-void IlluminationSet::sendIlluminationToShader(glm::mat4 view) const {
+void IlluminationSet::sendIlluminationToShader(const glm::mat4& view) const {
     for (auto lightIt = lights.begin(); lightIt != lights.end(); ++lightIt) {
         lightIt->light->sendToShader(view, lightIt->uLPos, lightIt->uLDir, lightIt->uLAngle);
         lightIt->light->sendColorToShader(lightIt->uLCol);
     }
 }
-void IlluminationSet::renderMaterials(glm::mat4 view) const {
+void IlluminationSet::renderMaterials(const glm::mat4& view) const {
     sendIlluminationToShader(view);
     for (auto materialIt = materials.begin(); materialIt != materials.end(); ++materialIt) {
         (*materialIt)->renderNodes(view);

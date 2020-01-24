@@ -17,22 +17,35 @@ Scene* Scene::currentScene = nullptr;
 
 Scene::Scene(Camera* camera_)
     : camera(camera_),
-      control(new Control(this)) {
+      control(new Control(this)),
+      framesUpdateFPS(static_cast<unsigned int>(8e8)) {
     currentScene = this;
 }
 
-void Scene::renderScene() const {
+void Scene::renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto itShader = shaders.begin(); itShader != shaders.end(); ++itShader) {
         (*itShader)->renderShader(view);
     }
     glutSwapBuffers();
+    ++renderedFrames;
 }
 void Scene::updateScene() {
+    const auto start = std::chrono::high_resolution_clock::now();
+    auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(start - lastRenderStart).count();
+    lastRenderStart = start;
+    const float updateTime = static_cast<float>(timeDiff) * 1e-9f;
+    timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(start - framesRenderedStart).count();
+    if (timeDiff > framesUpdateFPS) {
+        std::cout << "Rendered " << renderedFrames << " frames in " << timeDiff << " microseconds; FPS= " << 1e9f * static_cast<float>(renderedFrames) / static_cast<float>(timeDiff) << std::endl;
+        framesRenderedStart = start;
+        renderedFrames = 0;
+    }
+
     view = camera->getView();
-    glm::mat4 proj = camera->getProj();
+    const glm::mat4 proj = camera->getProj();
     for (auto itNode = nodes.begin(); itNode != nodes.end(); ++itNode) {
-        (*itNode)->updateNode(0.05f, view, proj);
+        (*itNode)->updateNode(updateTime, view, proj);
     }
     glutPostRedisplay();
 }
@@ -53,11 +66,13 @@ Control* Scene::getControl() const {
 Scene::~Scene() {
 }
 
-void Scene::initOpenGL(int argc, char** argv, const char* windowTitle, const int windowSizeX, const int windowSizeY, const int windowPositionX, const int windowPositionY) {
+void Scene::initOpenGL(const int argc, char** argv, const char* windowTitle, const int windowSizeX, const int windowSizeY, const int windowPositionX, const int windowPositionY) {
     initContext(argc, argv, windowTitle, windowSizeX, windowSizeY, windowPositionX, windowPositionY);
     initOGL(true, true, true, glm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
 }
 void Scene::start() {
+    renderedFrames = 0;
+    lastRenderStart = framesRenderedStart = std::chrono::high_resolution_clock::now();
     glutMainLoop();
 }
 
@@ -94,6 +109,7 @@ void Scene::initContext(int argc, char** argv, const char* windowTitle, const in
 void Scene::resizeFunc(int width, int height) {
     glViewport(0, 0, width, height);
     camera->setProjection(60.0, float(width) / float(height), 0.1f, 100.0f);
+    std::cout << "Scene resized to: { x = " << width << ", " << height << " }" << std::endl;
 }
 
 void Scene::initOGL(const bool enableDepthTest, const bool useCCW, const bool enableCulling, glm::vec4 backgroundColor) {

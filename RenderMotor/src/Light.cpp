@@ -9,13 +9,13 @@
 
 #include <iostream>
 
-Light::Light(glm::vec3 position_, glm::vec3 color_, glm::vec3 direction_, float angle_)
+Light::Light(const glm::vec3& position_, const glm::vec3& color_, const glm::vec3& direction_, const float angle_)
     : position(position_), angle(angle_), type(3) {
     setDirection(direction_);
     setColor(color_);
 }
 
-Light::Light(glm::vec3 positionOrDirection, glm::vec3 color_, int type_)
+Light::Light(const glm::vec3& positionOrDirection, const glm::vec3& color_, const int type_)
     : type(type_),
       position(type_ == 1 ? positionOrDirection : glm::vec3(0.0f)),
       angle(type == 3 ? 0.18f : 0.0f) {
@@ -27,7 +27,7 @@ Light::Light(glm::vec3 positionOrDirection, glm::vec3 color_, int type_)
     setColor(color_);
 }
 
-Light::Light(glm::vec3 position_, glm::vec3 color_)
+Light::Light(const glm::vec3& position_, const glm::vec3& color_)
     : position(position_), direction(glm::vec3(0.0f)), angle(0.0f), type(1) {
     setColor(color_);
 }
@@ -50,15 +50,15 @@ void Light::moveOrRotate(const glm::vec3& direction, const float value) {
     }
 }
 
-void Light::move(glm::vec3 distance) {
+void Light::move(const glm::vec3& distance) {
     position += distance;
 }
 
-void Light::rotate(glm::vec3 rotacion, float angle) {
+void Light::rotate(const glm::vec3& rotacion, const float angle) {
     direction = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, rotacion) * glm::vec4(direction, 0.0f));
 }
 
-void Light::sendToShader(glm::mat4 view, unsigned int positionId, unsigned int directionId, unsigned int angleId) const {
+void Light::sendToShader(const glm::mat4& view, const unsigned int positionId, const unsigned int directionId, const unsigned int angleId) const {
     if (type == 0) {
         std::cout << "WARNING: Sending to shader a Null light";
     } else {
@@ -74,7 +74,7 @@ void Light::sendToShader(glm::mat4 view, unsigned int positionId, unsigned int d
     }
 }
 
-void Light::sendDirectionToShader(glm::mat4 view, unsigned int id) const {
+void Light::sendDirectionToShader(const glm::mat4& view, const unsigned int id) const {
     if (id >= 0) {
         glm::vec3 tmp = glm::normalize(glm::vec3(view * glm::vec4(direction, 0.0f)));
         glUniform3fv(id, 1, &(tmp[0]));
@@ -83,7 +83,7 @@ void Light::sendDirectionToShader(glm::mat4 view, unsigned int id) const {
     }
 }
 
-void Light::sendAngleToShader(unsigned int id) const {
+void Light::sendAngleToShader(const unsigned int id) const {
     if (id != -1) {
         glUniform1f(id, angle);
     } else {
@@ -91,7 +91,7 @@ void Light::sendAngleToShader(unsigned int id) const {
     }
 }
 
-void Light::sendPositionToShader(glm::mat4 view, unsigned int id) const {
+void Light::sendPositionToShader(const glm::mat4& view, const unsigned int id) const {
     if (id != -1) {
         glm::vec3 temp = glm::vec3(view * glm::vec4(position, 1.0f));
         glUniform3fv(id, 1, &(temp[0]));
@@ -100,7 +100,7 @@ void Light::sendPositionToShader(glm::mat4 view, unsigned int id) const {
     }
 }
 
-void Light::sendColorToShader(unsigned int id) const {
+void Light::sendColorToShader(const unsigned int id) const {
     if (id != -1) {
         glUniform3fv(id, 1, &(color[0]));
     } else {
@@ -111,10 +111,10 @@ int Light::getType() const {
     return type;
 }
 
-void Light::setColor(glm::vec3 color_) {
+void Light::setColor(const glm::vec3& color_) {
     color = glm::clamp(color_, glm::vec3(0.0f), glm::vec3(1.0f));
 }
 
-void Light::setDirection(glm::vec3 direction_) {
+void Light::setDirection(const glm::vec3& direction_) {
     direction = glm::normalize(direction_);
 }

@@ -31,13 +31,14 @@ Shader::~Shader() {
 void Shader::addIllumination(IlluminationSet *illumination) {
     illuminations.push_back(illumination);
 }
-void Shader::renderShader(glm::mat4 view) const {
+void Shader::renderShader(const glm::mat4 &view) const {
     glUseProgram(program);
     for (auto itIllumination = illuminations.begin(); itIllumination != illuminations.end(); ++itIllumination) {
         (*itIllumination)->renderMaterials(view);
     }
 }
 int Shader::loadShader(const GLchar **shaderString, const GLint stringLength, const int type) const {
+    const auto start = std::chrono::high_resolution_clock::now();
     GLuint shader;
     shader = glCreateShader(type);
     glShaderSource(shader, 1 /*One string*/, shaderString, &stringLength);
@@ -56,10 +57,16 @@ int Shader::loadShader(const GLchar **shaderString, const GLint stringLength, co
         glDeleteShader(shader);
         exit(-1);
     }
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Shader loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
+
     return shader;
 }
 
 void Shader::initShader() {
+    const auto start = std::chrono::high_resolution_clock::now();
+
     program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragShader);
@@ -89,6 +96,9 @@ void Shader::initShader() {
     uModelViewProjMat = glGetUniformLocation(program, "modelViewProj");
 
     scene->addShader(this);
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "Shader: " << program << " started in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
 unsigned int Shader::getprogram() const {
@@ -116,6 +126,7 @@ Scene *Shader::getScene() const {
 }
 
 char *Shader::loadStringFromFile(const char *fileName, unsigned int &fileLen) {
+    const auto start = std::chrono::high_resolution_clock::now();
     // Loads the file
     std::ifstream file;
     file.open(fileName, std::ios::in);
@@ -143,6 +154,9 @@ char *Shader::loadStringFromFile(const char *fileName, unsigned int &fileLen) {
     }
     source[fileLen] = '\0';
     file.close();
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "File: " << fileName << " read in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 
     return source;
 }

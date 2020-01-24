@@ -15,11 +15,11 @@ AnimationWithInterpolation::AnimationWithInterpolation(const float totalTime_, s
       updateFunction(updateFunction_) {
 }
 
-glm::mat4 Animation::updateAnimation(const float timeIncrease, glm::mat4 view, glm::mat4 proj) {
+glm::mat4 Animation::updateAnimation(const float timeIncrease) {
     increaseTime(timeIncrease);
     return updateFunction(actualTime);
 }
-glm::mat4 AnimationWithInterpolation::updateAnimation(const float timeIncrease, glm::mat4 view, glm::mat4 proj) {
+glm::mat4 AnimationWithInterpolation::updateAnimation(const float timeIncrease) {
     increaseTime(timeIncrease);
     return updateFunction(actualTime, interpolation);
 }

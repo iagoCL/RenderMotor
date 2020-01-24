@@ -17,20 +17,20 @@ Node::Node(Model3D* mesh_, Material* material_)
 
 Node::~Node() {
 }
-void Node::updateNode(const float /*timeIncrease*/, glm::mat4 view, glm::mat4 proj) {
+void Node::updateNode(const float /*timeIncrease*/, const glm::mat4& view, const glm::mat4& proj) {
     modelView = view * model;
     modelViewProj = proj * modelView;
     normal = glm::transpose(glm::inverse(modelView));
 }
-void Node::setModel(glm::mat4 model_) {
+void Node::setModel(const glm::mat4& model_) {
     model = model_;
 }
 NodeAnimated::NodeAnimated(Model3D* mesh_, Material* material_, Animation* animation_)
     : Node(mesh_, material_),
       animation(animation_) {
 }
-void NodeAnimated::updateNode(const float timeIncrease, glm::mat4 view, glm::mat4 proj) {
-    model = animation->updateAnimation(timeIncrease, view, proj);
+void NodeAnimated::updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj) {
+    model = animation->updateAnimation(timeIncrease);
     Node::updateNode(timeIncrease, view, proj);
 }
 void Node::renderNode() const {

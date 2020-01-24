@@ -11,7 +11,7 @@ IlluminationSet* Material::getIlluminationSet() const {
 void Material::addNode(Node* node) {
     nodes.push_back(node);
 }
-void Material::renderNodes(glm::mat4 view) const {
+void Material::renderNodes(const glm::mat4& view) const {
     activateMaterial(view);
     for (auto nodeIt = nodes.begin(); nodeIt != nodes.end(); ++nodeIt) {
         (*nodeIt)->renderNode();
@@ -20,7 +20,7 @@ void Material::renderNodes(glm::mat4 view) const {
 SimpleMaterial::SimpleMaterial(IlluminationSet* illuminationSet_)
     : Material(illuminationSet_) {
 }
-void SimpleMaterial::activateMaterial(glm::mat4 view) const {
+void SimpleMaterial::activateMaterial(const glm::mat4& view) const {
 }
 BumpMaterial::BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_, Texture* normalsText_)
     : Material(illuminationSet_),
@@ -36,7 +36,7 @@ BumpMaterial::BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseTe
     uNormTex = glGetUniformLocation(program, "normalTex");
 }
 
-void BumpMaterial::activateMaterial(glm::mat4 view) const {
+void BumpMaterial::activateMaterial(const glm::mat4& view) const {
     if (uColorTex != -1 && diffuseText) {
         diffuseText->sendToShaderProgram(uColorTex);
     }

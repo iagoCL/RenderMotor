@@ -12,25 +12,25 @@ class Light {
     glm::vec3 color;
     float angle;
 
-    void sendDirectionToShader(glm::mat4 view, unsigned int id) const;
-    void sendAngleToShader(unsigned int id) const;
-    void sendPositionToShader(glm::mat4 view, unsigned int id) const;
+    void sendDirectionToShader(const glm::mat4& view, const unsigned int id) const;
+    void sendAngleToShader(const unsigned int id) const;
+    void sendPositionToShader(const glm::mat4& view, unsigned int id) const;
 
    public:
-    Light(glm::vec3 position, glm::vec3 color, glm::vec3 direction, float angle = 0.18f);  //Focal constructor
-    Light(glm::vec3 positionOrDirection, glm::vec3 color, int type_);                      //Directional or point constructor
-    Light(glm::vec3 position, glm::vec3 color);                                            //Point constructor
-    Light();                                                                               //Null contructor
+    Light(const glm::vec3& position, const glm::vec3& color, const glm::vec3& direction, const float angle = 0.18f);  //Focal constructor
+    Light(const glm::vec3& positionOrDirection, const glm::vec3& color, const int type_);                             //Directional or point constructor
+    Light(const glm::vec3& position, const glm::vec3& color);                                                         //Point constructor
+    Light();                                                                                                          //Null contructor
     ~Light();
-    void sendToShader(glm::mat4 view, unsigned int positionId, unsigned int directionId = -1, unsigned int angleId = -1) const;
-    void sendColorToShader(unsigned int id) const;
+    void sendToShader(const glm::mat4& view, const unsigned int positionId, const unsigned int directionId = -1, const unsigned int angleId = -1) const;
+    void sendColorToShader(const unsigned int id) const;
 
     void increaseColor(const glm::vec3& colorIncrease);
     void moveOrRotate(const glm::vec3& direction, const float value);
-    void move(glm::vec3 distance);
-    void rotate(glm::vec3 rotation, float angle);
+    void move(const glm::vec3& distance);
+    void rotate(const glm::vec3& rotation, const float angle);
     int getType() const;
-    void setColor(glm::vec3 color_);
-    void setDirection(glm::vec3 direction_);
+    void setColor(const glm::vec3& color_);
+    void setDirection(const glm::vec3& direction_);
 };
 #endif  //RENDER_MOTOR_LIGHT_H

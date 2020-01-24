@@ -19,7 +19,7 @@ class Animation {
 
    public:
     Animation(const float totalTime_, std::function<glm::mat4(const float)> updateFunction_);
-    virtual glm::mat4 updateAnimation(const float timeIncrease, glm::mat4 view, glm::mat4 proj);
+    virtual glm::mat4 updateAnimation(const float timeIncrease);
 };
 class AnimationWithInterpolation : public Animation {
    private:
@@ -28,6 +28,6 @@ class AnimationWithInterpolation : public Animation {
 
    public:
     AnimationWithInterpolation(const float totalTime_, std::function<glm::mat4(const float, Interpolation*)> updateFunction_, Interpolation* interpolation_);
-    glm::mat4 updateAnimation(const float timeIncrease, glm::mat4 view, glm::mat4 proj) override;
+    glm::mat4 updateAnimation(const float timeIncrease) override;
 };
 #endif  //RENDER_MOTOR_ANIMATION_H

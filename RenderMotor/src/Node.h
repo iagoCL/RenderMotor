@@ -24,8 +24,8 @@ class Node {
    public:
     Node(Model3D* mesh_, Material* material_);
     virtual void renderNode() const;
-    virtual void updateNode(const float timeIncrease, glm::mat4 view, glm::mat4 proj);
-    void setModel(glm::mat4 model);
+    virtual void updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj);
+    void setModel(const glm::mat4& model);
 
     virtual Shader* getShader() const;
     virtual Material* getMaterial() const;
@@ -38,6 +38,6 @@ class NodeAnimated : public Node {
 
    public:
     NodeAnimated(Model3D* mesh_, Material* material_, Animation* animation_);
-    virtual void updateNode(const float timeIncrease, glm::mat4 view, glm::mat4 proj) override;
+    virtual void updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj) override;
 };
 #endif  //RENDER_MOTOR_NODE_H
