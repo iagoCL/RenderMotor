@@ -6,10 +6,14 @@
 #include <gl/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
 #include <iostream>
-Light::Light(const glm::vec3& color_) {
+
+unsigned int Light::numLights = 0;
+
+Light::Light(const glm::vec3& color_)
+    : id(numLights++) {
     setColor(color_);
+    std::cout << "Created light: " << toString() << std::endl;
 }
 LightPoint::LightPoint(const glm::vec3& position_, const glm::vec3& color_)
     : Light(color_),
@@ -23,6 +27,9 @@ LightFocal::LightFocal(const glm::vec3& position_, const glm::vec3& color_, cons
     : LightPoint(position_, color_),
       LightDirectional(direction_, color_),
       angle(angle_) {
+}
+Light::~Light() {
+    std::cout << "Deleted light: " << toString() << std::endl;
 }
 
 void Light::setColor(const glm::vec3& color_) {
@@ -106,12 +113,15 @@ std::string Light::vecToString(const glm::vec3 vector) {
     return "[ " + std::to_string(vector[0]) + ", " + std::to_string(vector[1]) + ", " + std::to_string(vector[2]) + " ]";
 }
 
+std::string Light::toString() const {
+    return std::string("Light: { id: " + std::to_string(id) + " color: " + Light::vecToString(color) + " }\n");
+}
 std::string LightPoint::toString() const {
-    return std::string("Point Light: { color: " + Light::vecToString(color) + " , Position: " + Light::vecToString(position) + "}\n");
+    return std::string("Point Light: { id: " + std::to_string(id) + " color: " + Light::vecToString(color) + " , Position: " + Light::vecToString(position) + "}\n");
 }
 std::string LightDirectional::toString() const {
-    return std::string("Directional Light: { color: " + Light::vecToString(color) + " , Position: " + Light::vecToString(direction) + "}\n");
+    return std::string("Directional Light: { id: " + std::to_string(id) + " color: " + Light::vecToString(color) + " , Position: " + Light::vecToString(direction) + "}\n");
 }
 std::string LightFocal::toString() const {
-    return std::string("Focal Light: { color: " + Light::vecToString(LightDirectional::color) + " , Angle: " + std::to_string(angle) + " , Position: " + Light::vecToString(position) + " , Direction: " + Light::vecToString(direction) + "}\n");
+    return std::string("Focal Light: { id: " + std::to_string(LightDirectional::id) + "-" + std::to_string(LightPoint::id) + " color: " + Light::vecToString(LightDirectional::color) + " , Angle: " + std::to_string(angle) + " , Position: " + Light::vecToString(position) + " , Direction: " + Light::vecToString(direction) + "}\n");
 }

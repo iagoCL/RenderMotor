@@ -6,6 +6,8 @@
 
 class Camera {
    private:
+    static unsigned int numCameras;
+    const unsigned int id;
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 

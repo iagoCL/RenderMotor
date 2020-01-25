@@ -5,19 +5,19 @@
 #include <chrono>
 #include <iostream>
 
-int Texture::numberOfTextures = 0;
+int Texture::numTextures = 0;
 
 Texture::Texture(const int textureId_, const GLuint textureNumber_)
     : textureId(textureId_), textureNumber(textureNumber_) {
 }
 
 Texture::Texture(const char *fileName)
-    : textureNumber(numberOfTextures++), textureId(loadTexture(fileName)) {
+    : textureNumber(numTextures++), textureId(loadTexture(fileName)) {
 }
 
 Texture::~Texture() {
     glDeleteTextures(1, &textureId);
-    std::cout << "\nRemoved texture: " << textureId << std::endl;
+    std::cout << "Deleted texture: " << textureId << std::endl;
 }
 
 GLuint Texture::loadTexture(const char *fileName) {  //Loads the texture in memory

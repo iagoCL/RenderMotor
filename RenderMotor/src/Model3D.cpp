@@ -14,8 +14,10 @@
 #include <Assimp/scene.h>
 #include <Assimp/Importer.hpp>
 
+unsigned int Model3D::numMeshes = 0;
 Model3D::Model3D(const int numTriangles_, const int numVertices_, unsigned int* trianglesArray_, float* colorsArray_, float* normalArray_, float* positionsArray_, float* tangentArray_, float* textCoordArray_)
     : numTriangles(numTriangles_),
+      id(numMeshes++),
       numVertices(numVertices_),
       trianglesArray(trianglesArray_),
       colorsArray(colorsArray_),
@@ -23,9 +25,11 @@ Model3D::Model3D(const int numTriangles_, const int numVertices_, unsigned int* 
       positionsArray(positionsArray_),
       tangentsArray(tangentArray_),
       textCoordArray(textCoordArray_) {
+    std::cout << "Created model: " << id << std::endl;
 }
 
-Model3D::Model3D(aiMesh* importedMesh) {
+Model3D::Model3D(aiMesh* importedMesh)
+    : id(numMeshes++) {
     const auto start = std::chrono::high_resolution_clock::now();
     std::cout << "Obtained model mesh:" << std::endl;
 
@@ -107,40 +111,36 @@ Model3D::Model3D(aiMesh* importedMesh) {
     }
     const auto end = std::chrono::high_resolution_clock::now();
     const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    std::cout << "Model loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
+    std::cout << "Model: " << id << " loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
-Model3D** Model3D::loadFromFile(int& numberModels, const std::string pathToFile) {
+void Model3D::loadFromFile(std::vector<std::shared_ptr<Model3D>>& models, const std::string pathToFile) {
     const auto start = std::chrono::high_resolution_clock::now();
     std::cout << "\nStarting loading process. Please wait some seconds." << std::endl;
     Assimp::Importer importer;
     const aiScene* fileScene = importer.ReadFile(pathToFile, 0 /*Avoid postprocessing, Options to compute normalas/tangents, triangulate, optimize, etc.*/);
 
+    int numMeshes = 0;
     if (!fileScene) {
         std::cout << (importer.GetErrorString());
-        return nullptr;
-    }
-
-    else {
+    } else {
         std::cout << "Scene loaded from file. Computing number of meshes" << std::endl;
-        int numMeshes = fileScene->mNumMeshes;
-        numberModels += fileScene->mNumMeshes;
+        numMeshes = fileScene->mNumMeshes;
+        int numberModels = numMeshes + models.size();
         std::cout << "Loading scene with " << numMeshes << " meshes." << std::endl;
-        Model3D** sceneMeshes = new Model3D*[numMeshes];
-        for (int i = 0; i < numMeshes; i++) {
+        models.reserve(numberModels);
+        for (int i = 0; i < numMeshes; i++) {  //TODO optimize
             std::cout << std::endl
                       << std::endl
                       << std::endl
                       << "Loading mesh number " << i + 1 << ":" << std::endl
                       << std::endl;
-            sceneMeshes[i] = new Model3D(fileScene->mMeshes[i]);
+            models.push_back(std::shared_ptr<Model3D>(new Model3D(fileScene->mMeshes[i])));
         }
-        const auto end = std::chrono::high_resolution_clock::now();
-        const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-        std::cout << "Scene with: " << numMeshes << " loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
-
-        return sceneMeshes;
     }
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    std::cout << "File with: " << numMeshes << " loaded in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
 }
 
 Model3D::~Model3D() {
@@ -153,7 +153,7 @@ Model3D::~Model3D() {
     glDeleteBuffers(1, &trianglesIndexVBO);
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &modelVAO);
-    std::cout << "Completed mesh free." << std::endl;
+    std::cout << "Deleted mesh: " << id << std::endl;
 }
 
 void Model3D::initObject() {

@@ -15,7 +15,7 @@ class Texture {
     GLuint loadTexture(const char *fileName);
 
    public:
-    static int numberOfTextures;
+    static int numTextures;
 
     Texture(const char *fileName);
     ~Texture();

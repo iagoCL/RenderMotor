@@ -6,16 +6,36 @@
 #include <gl/glew.h>
 #include <iostream>
 
-Node::Node(Model3D* mesh_, Material* material_)
-    : mesh(mesh_),
-      material(material_),
-      model(glm::mat4(1.0f)) {
-    shader = material_->getIlluminationSet()->getShader();
-    material->addNode(this);
-    shader->getScene()->addNode(this);
-}
+unsigned int Node::numNodes = 0;
 
+std::shared_ptr<Node> Node::createNode(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_) {
+    std::shared_ptr<Node> node(new Node(mesh_, material_));
+    addToScene(node);
+    return node;
+}
+std::shared_ptr<NodeAnimated> NodeAnimated::createNodeAnimated(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_, std::shared_ptr<Animation> animation_) {
+    std::shared_ptr<NodeAnimated> node(new NodeAnimated(mesh_, material_, animation_));
+    addToScene(node);
+    return node;
+}
+Node::Node(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_)
+    : mesh(mesh_),
+      id(numNodes++),
+      material(material_),
+      shader(material_->getIlluminationSet()->getShader()),
+      model(glm::mat4(1.0f)) {
+    std::cout << "Created node: " << id << std::endl;
+}
+NodeAnimated::NodeAnimated(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_, std::shared_ptr<Animation> animation_)
+    : Node(mesh_, material_),
+      animation(animation_) {
+}
 Node::~Node() {
+    std::cout << "Deleted node: " << id << std::endl;
+}
+void Node::addToScene(std::shared_ptr<Node> node_) {
+    node_->material->addNode(node_);
+    node_->shader->getScene()->addNode(node_);
 }
 void Node::updateNode(const float /*timeIncrease*/, const glm::mat4& view, const glm::mat4& proj) {
     modelView = view * model;
@@ -24,10 +44,6 @@ void Node::updateNode(const float /*timeIncrease*/, const glm::mat4& view, const
 }
 void Node::setModel(const glm::mat4& model_) {
     model = model_;
-}
-NodeAnimated::NodeAnimated(Model3D* mesh_, Material* material_, Animation* animation_)
-    : Node(mesh_, material_),
-      animation(animation_) {
 }
 void NodeAnimated::updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj) {
     model = animation->updateAnimation(timeIncrease);
@@ -49,9 +65,9 @@ void Node::renderNode() const {
     mesh->renderModel();
 }
 
-Shader* Node::getShader() const {
+std::shared_ptr<Shader> Node::getShader() const {
     return shader;
 }
-Material* Node::getMaterial() const {
+std::shared_ptr<Material> Node::getMaterial() const {
     return material;
 }

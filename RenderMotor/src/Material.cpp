@@ -1,20 +1,44 @@
 #include "Material.h"
 
-Material::Material(IlluminationSet* illuminationSet_)
-    : illuminationSet(illuminationSet_) {
-    illuminationSet_->addMaterial(this);
+unsigned int Material::numMaterials = 0;
+
+std::shared_ptr<SimpleMaterial> SimpleMaterial::createSimpleMaterial(std::shared_ptr<IlluminationSet> illuminationSet_) {
+    std::shared_ptr<SimpleMaterial> material(new SimpleMaterial(illuminationSet_));
+    illuminationSet_->addMaterial(material);
+    return material;
 }
-SimpleMaterial::SimpleMaterial(IlluminationSet* illuminationSet_)
+std::shared_ptr<SimpleTextureMaterial> SimpleTextureMaterial::createSimpleTextureMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_) {
+    std::shared_ptr<SimpleTextureMaterial> material(new SimpleTextureMaterial(illuminationSet_, diffuseText_));
+    illuminationSet_->addMaterial(material);
+    return material;
+}
+std::shared_ptr<TextureMaterial> TextureMaterial::createTextureMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_, std::shared_ptr<Texture> emissiveText_, std::shared_ptr<Texture> specularText_) {
+    std::shared_ptr<TextureMaterial> material(new TextureMaterial(illuminationSet_, diffuseText_, emissiveText_, specularText_));
+    illuminationSet_->addMaterial(material);
+    return material;
+}
+std::shared_ptr<BumpMaterial> BumpMaterial::createBumpMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_, std::shared_ptr<Texture> emissiveText_, std::shared_ptr<Texture> specularText_, std::shared_ptr<Texture> normalsText_) {
+    std::shared_ptr<BumpMaterial> material(new BumpMaterial(illuminationSet_, diffuseText_, emissiveText_, specularText_, normalsText_));
+    illuminationSet_->addMaterial(material);
+    return material;
+}
+
+Material::Material(std::shared_ptr<IlluminationSet> illuminationSet_)
+    : illuminationSet(illuminationSet_),
+      id(numMaterials++) {
+    std::cout << "Created material: " << id << std::endl;
+}
+SimpleMaterial::SimpleMaterial(std::shared_ptr<IlluminationSet> illuminationSet_)
     : Material(illuminationSet_) {
 }
-SimpleTextureMaterial::SimpleTextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_)
+SimpleTextureMaterial::SimpleTextureMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_)
     : Material(illuminationSet_),
       diffuseText(diffuseText_) {
     unsigned int program = illuminationSet_->getShader()->getProgram();
 
     uColorTex = glGetUniformLocation(program, "colorTex");
 }
-TextureMaterial::TextureMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_)
+TextureMaterial::TextureMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_, std::shared_ptr<Texture> emissiveText_, std::shared_ptr<Texture> specularText_)
     : SimpleTextureMaterial(illuminationSet_, diffuseText_),
       emissiveText(emissiveText_),
       specularText(specularText_) {
@@ -23,18 +47,21 @@ TextureMaterial::TextureMaterial(IlluminationSet* illuminationSet_, Texture* dif
     uEmiTex = glGetUniformLocation(program, "emiTex");
     uSpecTex = glGetUniformLocation(program, "specularTex");
 }
-BumpMaterial::BumpMaterial(IlluminationSet* illuminationSet_, Texture* diffuseText_, Texture* emissiveText_, Texture* specularText_, Texture* normalsText_)
+BumpMaterial::BumpMaterial(std::shared_ptr<IlluminationSet> illuminationSet_, std::shared_ptr<Texture> diffuseText_, std::shared_ptr<Texture> emissiveText_, std::shared_ptr<Texture> specularText_, std::shared_ptr<Texture> normalsText_)
     : TextureMaterial(illuminationSet_, diffuseText_, emissiveText_, specularText_),
       normalsText(normalsText_) {
     unsigned int program = illuminationSet_->getShader()->getProgram();
 
     uNormTex = glGetUniformLocation(program, "normalTex");
 }
-IlluminationSet* Material::getIlluminationSet() const {
+Material::~Material() {
+    std::cout << "Deleted material: " << id << std::endl;
+}
+std::shared_ptr<IlluminationSet> Material::getIlluminationSet() const {
     return illuminationSet;
 }
 
-void Material::addNode(Node* node) {
+void Material::addNode(std::shared_ptr<Node> node) {
     nodes.push_back(node);
 }
 void Material::renderNodes(const glm::mat4& view) const {

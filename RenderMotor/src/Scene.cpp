@@ -13,12 +13,17 @@
 
 #include "Shader.h"
 
-Scene* Scene::currentScene = nullptr;
+unsigned int Scene::numScenes = 0;
+std::shared_ptr<Scene> Scene::currentScene = std::shared_ptr<Scene>(nullptr);
+Scene* Scene::currentScenePtr = nullptr;
+Control* Scene::currentControlPtr = nullptr;
 
-Scene::Scene(Camera* camera_)
+Scene::Scene(std::shared_ptr<Camera> camera_)
     : camera(camera_),
-      control(new Control(this)),
+      control(new Control(camera_)),
+      id(numScenes++),
       framesUpdateFPS(static_cast<unsigned int>(8e8)) {
+    std::cout << "Created scene: " << id << std::endl;
 }
 
 void Scene::renderScene() {
@@ -43,26 +48,28 @@ void Scene::updateScene() {
 
     view = camera->getView();
     const glm::mat4 proj = camera->getProj();
-    for (auto itNode = nodes.begin(); itNode != nodes.end(); ++itNode) {
-        (*itNode)->updateNode(updateTime, view, proj);
-    }
+    std::for_each(
+        nodes.begin(), nodes.end(), [&](std::shared_ptr<Node>& node) {
+            node->updateNode(updateTime, view, proj);
+        });
     glutPostRedisplay();
 }
 
-void Scene::addShader(Shader* shader_) {
+void Scene::addShader(std::shared_ptr<Shader> shader_) {
     shaders.push_back(shader_);
 }
-void Scene::addNode(Node* node_) {
+void Scene::addNode(std::shared_ptr<Node> node_) {
     nodes.push_back(node_);
 }
-Camera* Scene::getCamera() const {
+std::shared_ptr<Camera> Scene::getCamera() const {
     return camera;
 }
-Control* Scene::getControl() const {
+std::shared_ptr<Control> Scene::getControl() const {
     return control;
 }
 
 Scene::~Scene() {
+    std::cout << "Deleted scene: " << id << std::endl;
 }
 
 void Scene::initOpenGL(const int argc, char** argv, const char* windowTitle, const int windowSizeX, const int windowSizeY, const int windowPositionX, const int windowPositionY) {
@@ -103,6 +110,7 @@ void Scene::initContext(int argc, char** argv, const char* windowTitle, const in
     glutKeyboardFunc(Scene::keyboardFuncCall);
     glutMouseFunc(Scene::mouseFuncCall);
     glutMotionFunc(Scene::mouseMotionFuncCall);
+    glutCloseFunc(Scene::closeSceneCall);
 }
 
 void Scene::resizeFunc(int width, int height) {
@@ -111,7 +119,7 @@ void Scene::resizeFunc(int width, int height) {
     std::cout << "Scene resized to: { x = " << width << ", " << height << " }" << std::endl;
 }
 
-void Scene::initOGL(const bool enableDepthTest, const bool useCCW, const bool enableCulling, glm::vec4 backgroundColor) {
+void Scene::initOGL(const bool enableDepthTest, const bool useCCW, const bool enableCulling, const glm::vec4& backgroundColor) {
     if (enableDepthTest) {
         glEnable(GL_DEPTH_TEST);
     } else {
@@ -137,48 +145,55 @@ void Scene::initOGL(const bool enableDepthTest, const bool useCCW, const bool en
 }
 
 void Scene::renderSceneCall() {
-    if (currentScene) {
-        currentScene->renderScene();
+    if (currentScenePtr) {
+        currentScenePtr->renderScene();
     } else {
         std::cout << "ERROR: rendering scene; current scene null.";
     }
 }
 void Scene::updateSceneCall() {
-    if (currentScene) {
-        currentScene->updateScene();
+    if (currentScenePtr) {
+        currentScenePtr->updateScene();
     } else {
         std::cout << "ERROR: rendering scene; current scene null.";
     }
 }
 void Scene::resizeFuncCall(int width, int height) {
-    if (currentScene) {
-        currentScene->resizeFunc(width, height);
+    if (currentScenePtr) {
+        currentScenePtr->resizeFunc(width, height);
     } else {
         std::cout << "ERROR: resizeing scene; current scene null.";
     }
 }
 void Scene::keyboardFuncCall(unsigned char key, int x, int y) {
-    if (currentScene && currentScene->control) {
-        currentScene->control->keyboardFunc(key, x, y);
+    if (currentScenePtr && currentControlPtr) {
+        currentControlPtr->keyboardFunc(key, x, y);
     } else {
         std::cout << "ERROR: hadeling keyboard; current scene or control null.";
     }
 }
 void Scene::mouseFuncCall(int button, int state, int x, int y) {
-    if (currentScene && currentScene->control) {
-        currentScene->control->mouseFunc(button, state, x, y);
+    if (currentScenePtr && currentControlPtr) {
+        currentControlPtr->mouseFunc(button, state, x, y);
     } else {
         std::cout << "ERROR: hadeling mouse function; current scene or control null.";
     }
 }
+void Scene::closeSceneCall() {
+    currentScenePtr = nullptr;
+    currentScene = nullptr;
+    glutLeaveMainLoop();
+}
 void Scene::mouseMotionFuncCall(int x, int y) {
-    if (currentScene && currentScene->control) {
-        currentScene->control->mouseMotionFunc(x, y);
+    if (currentScenePtr && currentControlPtr) {
+        currentControlPtr->mouseMotionFunc(x, y);
     } else {
         std::cout << "ERROR: hadeling mouse movement; current scene or control null.";
     }
 }
-void Scene::setCurrentScene(Scene* scene_){
+void Scene::setCurrentScene(std::shared_ptr<Scene> scene_) {
     currentScene = scene_;
+    currentScenePtr = scene_.get();
+    currentControlPtr = scene_->control.get();
     scene_->start();
 }

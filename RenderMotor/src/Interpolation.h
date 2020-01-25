@@ -6,8 +6,13 @@
 #include <vector>
 
 class Interpolation {
+   protected:
+    static unsigned int numInterpolations;
+    const unsigned int id;
+
    public:
     Interpolation();
+    ~Interpolation();
     virtual glm::vec3 getPosition(const float actualTime) const = 0;
 };
 class SplinesInterpolation : public Interpolation {

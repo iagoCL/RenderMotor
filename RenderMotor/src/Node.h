@@ -12,32 +12,40 @@ class Material;
 class Animation;
 class Node {
    protected:
-    Model3D* mesh;
-    Shader* shader;
-    Material* material;
+    static unsigned int numNodes;
+    const unsigned int id;
+
+    const std::shared_ptr<Model3D> mesh;
+    const std::shared_ptr<Shader> shader;
+    const std::shared_ptr<Material> material;
 
     glm::mat4 model;
     glm::mat4 modelView;
     glm::mat4 modelViewProj;
     glm::mat4 normal;
 
+    Node(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_);
+    static void addToScene(std::shared_ptr<Node> node_);
+
    public:
-    Node(Model3D* mesh_, Material* material_);
+    static std::shared_ptr<Node> createNode(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_);
     virtual void renderNode() const;
     virtual void updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj);
     void setModel(const glm::mat4& model);
 
-    virtual Shader* getShader() const;
-    virtual Material* getMaterial() const;
+    virtual std::shared_ptr<Shader> getShader() const;
+    virtual std::shared_ptr<Material> getMaterial() const;
 
     ~Node();
 };
 class NodeAnimated : public Node {
    protected:
-    Animation* animation;
+    const std::shared_ptr<Animation> animation;
+
+    NodeAnimated(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_, std::shared_ptr<Animation> animation_);
 
    public:
-    NodeAnimated(Model3D* mesh_, Material* material_, Animation* animation_);
+    static std::shared_ptr<NodeAnimated> createNodeAnimated(std::shared_ptr<Model3D> mesh_, std::shared_ptr<Material> material_, std::shared_ptr<Animation> animation_);
     virtual void updateNode(const float timeIncrease, const glm::mat4& view, const glm::mat4& proj) override;
 };
 #endif  //RENDER_MOTOR_NODE_H

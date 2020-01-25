@@ -5,42 +5,49 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Control::Control(Scene* scene_)
-    : scene(scene_),
+unsigned int Control::numControls = 0;
+
+Control::Control(std::shared_ptr<Camera> camera_)
+    : camera(camera_),
+      id(numControls++),
       mouseX(0),
       mouseY(0),
       mouseYAngle(0.0f) {
+    std::cout << "Created Control: " << id << std::endl;
+}
+Control::~Control() {
+    std::cout << "Deleted Control: " << id << std::endl;
 }
 void Control::keyboardFunc(unsigned char key, int x, int y) {
     std::cout << "Pressed key: " << key << " at: {" << x << ", " << y << "}" << std::endl;
     switch (key) {
         case 'w':
-            scene->getCamera()->move(glm::vec3(0.0f, 0.0f, 1.0f));
+            camera->move(glm::vec3(0.0f, 0.0f, 1.0f));
             std::cout << "Camera moved." << std::endl
                       << std::endl;
             break;
         case 's':
-            scene->getCamera()->move(glm::vec3(0.0f, 0.0f, -1.0f));
+            camera->move(glm::vec3(0.0f, 0.0f, -1.0f));
             std::cout << "Camera moved." << std::endl
                       << std::endl;
             break;
         case 'a':
-            scene->getCamera()->move(glm::vec3(1.0f, 0.0f, 0.0f));
+            camera->move(glm::vec3(1.0f, 0.0f, 0.0f));
             std::cout << "Camera moved." << std::endl
                       << std::endl;
             break;
         case 'd':
-            scene->getCamera()->move(glm::vec3(-1.0f, 0.0f, 0.0f));
+            camera->move(glm::vec3(-1.0f, 0.0f, 0.0f));
             std::cout << "Camera moved." << std::endl
                       << std::endl;
             break;
         case 'e':
-            scene->getCamera()->viewRotation(-0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            camera->viewRotation(-0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
             std::cout << "Camera rotated." << std::endl
                       << std::endl;
             break;
         case 'q':
-            scene->getCamera()->viewRotation(0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+            camera->viewRotation(0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
             std::cout << "Camera rotated." << std::endl
                       << std::endl;
             break;
@@ -111,7 +118,7 @@ void Control::increaseLightsColors(const glm::vec3& colorIncrease) {
     std::cout << "Light color changed." << std::endl
               << std::endl;
 }
-void Control::addLight(Light* light) {
+void Control::addLight(std::shared_ptr<Light> light) {
     lights.push_back(light);
     selectedLightIt = lights.begin();
 }
@@ -144,7 +151,7 @@ void Control::showControls() {
 
 void Control::mouseMotionFunc(int x, int y) {
     //Horizontal rotation
-    scene->getCamera()->viewRotation(0.005f * static_cast<float>(x - mouseX), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera->viewRotation(0.005f * static_cast<float>(x - mouseX), glm::vec3(0.0f, 1.0f, 0.0f));
 
     float yShift = static_cast<float>(y - mouseY) * 0.005f;
     mouseYAngle += yShift;
@@ -157,7 +164,7 @@ void Control::mouseMotionFunc(int x, int y) {
         mouseYAngle = -glm::half_pi<float>();
     }
 
-    scene->getCamera()->rotate(yShift, glm::vec3(1.0f, 0.0f, 0.0f));
+    camera->rotate(yShift, glm::vec3(1.0f, 0.0f, 0.0f));
     mouseX = x;
     mouseY = y;
 }

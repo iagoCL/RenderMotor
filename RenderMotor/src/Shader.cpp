@@ -4,17 +4,23 @@
 #include <iostream>
 #include <string>
 
-Shader::Shader(const char *vertPath, const char *fragPath, Scene *scene_) : scene(scene_) {
-    unsigned int fileLen;
-    char *fileString = loadStringFromFile(vertPath, fileLen);
-    vertexShader = loadShader(const_cast<const GLchar **>(static_cast<GLchar **>(&fileString)), static_cast<const GLint>(fileLen), GL_VERTEX_SHADER);
-    delete fileString;
-    fileString = loadStringFromFile(fragPath, fileLen);
-    fragShader = loadShader(const_cast<const GLchar **>(static_cast<GLchar **>(&fileString)), static_cast<const GLint>(fileLen), GL_FRAGMENT_SHADER);
-    delete fileString;
-    initShader();
+std::shared_ptr<Shader> Shader::createShader(const GLchar **vertString, const GLint vertStringLength, const GLchar **fragString, const GLint fragStringLength, std::shared_ptr<Scene> scene_) {
+    std::shared_ptr<Shader> shader(new Shader(vertString, vertStringLength, fragString, fragStringLength, scene_));
+    scene_->addShader(shader);
+    return shader;
 }
-Shader::Shader(const GLchar **vertString, const GLint vertStringLength, const GLchar **fragString, const GLint fragStringLength, Scene *scene_)
+std::shared_ptr<Shader> Shader::createShaderFromFiles(const char *vertPath, const char *fragPath, std::shared_ptr<Scene> scene_) {
+    unsigned int fragStringLength, vertStringLength;
+    const char *vertString = loadStringFromFile(vertPath, vertStringLength);
+    const char *fragString = loadStringFromFile(fragPath, fragStringLength);
+    std::shared_ptr<Shader> shader = Shader::createShader(static_cast<const GLchar **>(&vertString), static_cast<const GLint>(vertStringLength),
+                                                          static_cast<const GLchar **>(&fragString), static_cast<const GLint>(fragStringLength), scene_);
+    delete vertString;
+    delete fragString;
+    return shader;
+}
+
+Shader::Shader(const GLchar **vertString, const GLint vertStringLength, const GLchar **fragString, const GLint fragStringLength, std::shared_ptr<Scene> scene_)
     : vertexShader(loadShader(vertString, vertStringLength, GL_VERTEX_SHADER)),
       fragShader(loadShader(fragString, fragStringLength, GL_FRAGMENT_SHADER)),
       scene(scene_) {
@@ -27,8 +33,9 @@ Shader::~Shader() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragShader);
     glDeleteProgram(program);
+    std::cout << "Deleted shader: " << program << std::endl;
 }
-void Shader::addIllumination(IlluminationSet *illumination) {
+void Shader::addIllumination(std::shared_ptr<IlluminationSet> illumination) {
     illuminations.push_back(illumination);
 }
 void Shader::renderShader(const glm::mat4 &view) const {
@@ -95,7 +102,6 @@ void Shader::initShader() {
     uModelViewMat = glGetUniformLocation(program, "modelView");
     uModelViewProjMat = glGetUniformLocation(program, "modelViewProj");
 
-    scene->addShader(this);
     const auto end = std::chrono::high_resolution_clock::now();
     const auto timeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     std::cout << "Shader: " << program << " started in: " << timeDiff << " nanoSeconds = " << 1e-9f * static_cast<float>(timeDiff) << " seconds." << std::endl;
@@ -121,7 +127,7 @@ int Shader::getProgram() const {
     return program;
 }
 
-Scene *Shader::getScene() const {
+std::shared_ptr<Scene> Shader::getScene() const {
     return scene;
 }
 

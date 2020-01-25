@@ -2,6 +2,7 @@
 #define RENDER_MOTOR_SHADER_H
 
 #include <gl/glew.h>
+#include <memory>
 
 #include <gl/gl.h>
 #include "IlluminationSet.h"
@@ -10,7 +11,6 @@
 class Scene;
 class IlluminationSet;
 class Shader {
-
    private:
     unsigned int vertexShader;
     unsigned int fragShader;
@@ -20,20 +20,20 @@ class Shader {
     int uModelViewProjMat;
     int uNormalMat;
 
-    std::vector<IlluminationSet*> illuminations;
-    Scene* scene;
+    std::vector<std::shared_ptr<IlluminationSet>> illuminations;
+    std::shared_ptr<Scene> scene;
 
     int loadShader(const GLchar** shaderString, const GLint stringLength, const int type) const;
     void initShader();
     void showShaderError() const;
+    Shader(const GLchar** vertString, const GLint vertStringLength, const GLchar** fragString, const GLint fragStringLength, std::shared_ptr<Scene> scene_);
 
    public:
-    Shader(const char* vertPath, const char* fragPath, Scene* scene_);
-    Shader(const GLchar** vertString, const GLint vertStringLength, const GLchar** fragString, const GLint fragStringLength, Scene* scene_);
+    static std::shared_ptr<Shader> createShaderFromFiles(const char* vertPath, const char* fragPath, std::shared_ptr<Scene> scene_);
+    static std::shared_ptr<Shader> createShader(const GLchar** vertString, const GLint vertStringLength, const GLchar** fragString, const GLint fragStringLength, std::shared_ptr<Scene> scene_);
     ~Shader();
-
     void renderShader(const glm::mat4& view) const;
-    void addIllumination(IlluminationSet* illumination);
+    void addIllumination(std::shared_ptr<IlluminationSet> illumination);
 
     int getuNormalMat() const;
     int getuModelViewMat() const;
@@ -42,7 +42,7 @@ class Shader {
     unsigned int getprogram() const;
     int getProgram() const;
 
-    Scene* getScene() const;
+    std::shared_ptr<Scene> getScene() const;
 
     static char* loadStringFromFile(const char* fileName, unsigned int& fileLen);
 };

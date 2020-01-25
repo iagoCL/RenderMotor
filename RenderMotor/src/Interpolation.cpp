@@ -6,7 +6,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-Interpolation::Interpolation() {
+unsigned int Interpolation::numInterpolations = 0;
+
+Interpolation::Interpolation()
+    : id(numInterpolations++) {
+    std::cout << "Created interplation: " << id << std::endl;
+}
+
+Interpolation::~Interpolation() {
+    std::cout << "Deleted interplation: " << id << std::endl;
 }
 
 BezierInterpolation::BezierInterpolation(const float totalTime, std::vector<glm::vec3>* controlPoints_)

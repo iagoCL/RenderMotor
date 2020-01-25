@@ -2,6 +2,8 @@
 #define RENDER_MOTOR_MODEL_3D_H
 
 #include <gl/glew.h>
+#include <memory>
+#include <vector>
 
 #include <gl/gl.h>
 
@@ -15,6 +17,9 @@
 
 class Model3D {
    private:
+    static unsigned int numMeshes;
+    const unsigned int id;
+
     GLuint modelVAO = 0;
     GLuint positionVBO = 0;
     GLuint colorVBO = 0;
@@ -38,7 +43,7 @@ class Model3D {
    public:
     Model3D(const int numTriangles_, const int numVertices_, unsigned int* trianglesArray_ = nullptr, float* colorsArray_ = nullptr, float* normalArray_ = nullptr, float* positionsArray_ = nullptr, float* tangentArray_ = nullptr, float* textCoordArray_ = nullptr);
     Model3D(aiMesh* assimpMesh);
-    static Model3D** loadFromFile(int& numberModels, const std::string pathToFile);
+    static void loadFromFile(std::vector<std::shared_ptr<Model3D>>& models, const std::string pathToFile);
     ~Model3D();
     void initObject();
     void renderModel() const;

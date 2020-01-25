@@ -7,21 +7,25 @@
 
 class Light {
    protected:
+    static unsigned int numLights;
+    const unsigned int id;
+
     glm::vec3 color;
 
     Light(const glm::vec3& color_);
-    static std::string vecToString(const glm::vec3 vector);
-
 
    public:
+    static std::string vecToString(const glm::vec3 vector);
+
     virtual void sendToShader(const glm::mat4& view, const unsigned int positionId, const unsigned int directionId = -1, const unsigned int angleId = -1) const = 0;
     virtual void sendColorToShader(const unsigned int id) const;
 
-    virtual std::string toString() const = 0;
+    virtual std::string toString() const;
 
     virtual void increaseColor(const glm::vec3& colorIncrease);
     virtual void moveOrRotate(const glm::vec3& direction, const float value) = 0;
     virtual void setColor(const glm::vec3& color_);
+    virtual ~Light();
 };
 class LightPoint : public Light {
    protected:
@@ -39,7 +43,6 @@ class LightPoint : public Light {
 };
 class LightDirectional : public Light {
    protected:
-    int type;  //0 - NULL; 1 - POINT; 2 - DIRECTIONAL; 3 - FOCAL
     glm::vec3 direction;
 
     void sendDirectionToShader(const glm::mat4& view, const unsigned int id) const;
